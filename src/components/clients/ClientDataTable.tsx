@@ -30,6 +30,34 @@ interface Props {
 const formatNumber = (v: number) =>
   v === 0 ? "0" : new Intl.NumberFormat("vi-VN").format(v);
 
+const STATUS_CONFIG = {
+  hddt: {
+    da_ket_noi: { label: "Đã kết nối", cls: "bg-emerald-100 text-emerald-700" },
+    chua_ket_noi: { label: "Chưa kết nối", cls: "bg-amber-100 text-amber-700" },
+    het_han: { label: "Hết hạn", cls: "bg-red-100 text-red-700" },
+  },
+  thue: {
+    da_nop: { label: "Đã nộp", cls: "bg-emerald-100 text-emerald-700" },
+    chua_nop: { label: "Chưa nộp", cls: "bg-amber-100 text-amber-700" },
+    qua_han: { label: "Quá hạn", cls: "bg-red-100 text-red-700" },
+  },
+  cks: {
+    con_han: { label: "Còn hạn", cls: "bg-emerald-100 text-emerald-700" },
+    het_han: { label: "Hết hạn", cls: "bg-red-100 text-red-700" },
+    chua_dang_ky: { label: "Chưa ĐK", cls: "bg-muted text-muted-foreground" },
+  },
+} as const;
+
+function StatusBadge({ type, value }: { type: keyof typeof STATUS_CONFIG; value: string }) {
+  const config = (STATUS_CONFIG[type] as Record<string, { label: string; cls: string }>)[value];
+  if (!config) return <span className="text-xs text-muted-foreground">—</span>;
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${config.cls}`}>
+      {config.label}
+    </span>
+  );
+}
+
 type SortKey = "ten" | "nhom" | "nhan_vien_phu_trach" | "phi_dich_vu_toi_thieu" | "phi_dich_vu_toi_da" | "cong_no" | "hoa_don_di";
 type SortDir = "asc" | "desc";
 
@@ -230,13 +258,16 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
                 <TableHead className="text-right min-w-[80px]">
                   <SortButton label="Công nợ" sortKey="cong_no" current={sort} onSort={handleSort} />
                 </TableHead>
-                <TableHead className="text-center min-w-[80px]">Thao tác</TableHead>
+                <TableHead className="text-center min-w-[100px]">HĐ điện tử</TableHead>
+                <TableHead className="text-center min-w-[100px]">Thuế điện tử</TableHead>
+                <TableHead className="text-center min-w-[100px]">Chữ ký số</TableHead>
+                <TableHead className="text-center min-w-[110px]">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={13} className="text-center py-10 text-muted-foreground">
                     Không tìm thấy khách hàng nào
                   </TableCell>
                 </TableRow>
@@ -292,25 +323,34 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
                       {formatNumber(client.cong_no)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <StatusBadge type="hddt" value={client.hoa_don_dien_tu} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge type="thue" value={client.thue_dien_tu} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge type="cks" value={client.chu_ky_so} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1.5">
                         {showCreateContract && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <button className="p-1 rounded hover:bg-primary/10" title="Tạo hợp đồng dịch vụ" onClick={(e) => { e.stopPropagation(); onCreateContract?.(client); }}>
-                                <PlusCircle className="h-4 w-4 text-primary" />
+                              <button className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" title="Tạo hợp đồng dịch vụ" onClick={(e) => { e.stopPropagation(); onCreateContract?.(client); }}>
+                                <PlusCircle className="h-3.5 w-3.5 text-primary" />
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>Tạo hợp đồng dịch vụ</TooltipContent>
                           </Tooltip>
                         )}
-                        <button className="p-1 rounded hover:bg-muted" title="Xem">
-                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        <button className="w-7 h-7 rounded-full bg-sky-500/10 flex items-center justify-center hover:bg-sky-500/20 transition-colors" title="Xem" onClick={(e) => e.stopPropagation()}>
+                          <Eye className="h-3.5 w-3.5 text-sky-600" />
                         </button>
-                        <button className="p-1 rounded hover:bg-muted" title="Sửa" onClick={(e) => { e.stopPropagation(); onEditClient?.(client); }}>
-                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        <button className="w-7 h-7 rounded-full bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/20 transition-colors" title="Sửa" onClick={(e) => { e.stopPropagation(); onEditClient?.(client); }}>
+                          <Edit className="h-3.5 w-3.5 text-blue-600" />
                         </button>
-                        <button className="p-1 rounded hover:bg-destructive/10" title="Xóa" onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <button className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center hover:bg-destructive/20 transition-colors" title="Xóa" onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}>
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </button>
                       </div>
                     </TableCell>
