@@ -35,23 +35,167 @@ function SeniorityBadges({ years, months }: { years: number; months: number }) {
   );
 }
 
+type SubSortKey = "ma_so_thue" | "ten" | "nhom_khach_hang" | "gia_tri_hop_dong" | "nhan_vien_ho_tro";
+type SubSortDir = "asc" | "desc";
+
+function SubSortBtn({ sortKey, current, onSort }: { sortKey: SubSortKey; current: { key: SubSortKey; dir: SubSortDir } | null; onSort: (k: SubSortKey) => void }) {
+  const active = current?.key === sortKey;
+  const Icon = active ? (current.dir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+  return (
+    <button type="button" onClick={(e) => { e.stopPropagation(); onSort(sortKey); }}
+      className={`ml-0.5 p-0.5 rounded hover:bg-background/80 ${active ? "text-primary" : "text-muted-foreground/40 hover:text-muted-foreground"}`}>
+      <Icon className="h-3 w-3" />
+    </button>
+  );
+}
+
 function ExpandedRow({ employeeId }: { employeeId: number }) {
   const { data: clients, isLoading } = useEmployeeClients(employeeId);
-  if (isLoading) return <TableRow><TableCell colSpan={14} className="p-4"><Skeleton className="h-8 w-full" /></TableCell></TableRow>;
-  if (!clients?.length) return <TableRow><TableCell colSpan={14} className="text-center text-muted-foreground py-4 text-sm">Không có khách hàng</TableCell></TableRow>;
+  const navigate = useNavigate();
+  const [subSearch, setSubSearch] = useState<Record<string, string>>({});
+  const [subSort, setSubSort] = useState<{ key: SubSortKey; dir: SubSortDir } | null>(null);
+
+  const handleSubSort = useCallback((key: SubSortKey) => {
+    setSubSort(prev => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return null;
+    });
+  }, []);
+
+  const setSearch = useCallback((col: string, val: string) => {
+    setSubSearch(prev => ({ ...prev, [col]: val }));
+  }, []);
+
+  const filteredClients = useMemo(() => {
+    if (!clients) return [];
+    let list = [...clients];
+    // Column filters
+    Object.entries(subSearch).forEach(([col, val]) => {
+      if (!val) return;
+      const q = val.toLowerCase();
+      list = list.filter(c => {
+        switch (col) {
+          case "ma_so_thue": return c.ma_so_thue.includes(q);
+          case "ten": return c.ten.toLowerCase().includes(q);
+          case "nhom_khach_hang": return c.nhom_khach_hang.toLowerCase().includes(q);
+          case "gia_tri_hop_dong": return fmt(c.gia_tri_hop_dong).includes(q);
+          case "nhan_vien_ho_tro": return c.nhan_vien_ho_tro.toLowerCase().includes(q);
+          default: return true;
+        }
+      });
+    });
+    // Sort
+    if (subSort) {
+      list.sort((a, b) => {
+        let cmp = 0;
+        switch (subSort.key) {
+          case "ma_so_thue": cmp = a.ma_so_thue.localeCompare(b.ma_so_thue); break;
+          case "ten": cmp = a.ten.localeCompare(b.ten, "vi"); break;
+          case "nhom_khach_hang": cmp = a.nhom_khach_hang.localeCompare(b.nhom_khach_hang, "vi"); break;
+          case "gia_tri_hop_dong": cmp = a.gia_tri_hop_dong - b.gia_tri_hop_dong; break;
+          case "nhan_vien_ho_tro": cmp = a.nhan_vien_ho_tro.localeCompare(b.nhan_vien_ho_tro); break;
+        }
+        return subSort.dir === "asc" ? cmp : -cmp;
+      });
+    }
+    return list;
+  }, [clients, subSearch, subSort]);
+
+  const copyTaxCode = useCallback((code: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(code);
+    toast.success("Đã sao chép mã số thuế");
+  }, []);
+
+  if (isLoading) return (
+    <TableRow>
+      <TableCell colSpan={14} className="p-4">
+        <Skeleton className="h-20 w-full" />
+      </TableCell>
+    </TableRow>
+  );
+
+  const totalClients = clients?.length || 0;
+
   return (
-    <>
-      {clients.map((c) => (
-        <TableRow key={c.id} className="bg-muted/20">
-          <TableCell />
-          <TableCell />
-          <TableCell colSpan={2} className="text-xs">{c.ten}</TableCell>
-          <TableCell className="text-xs">{c.ma_so_thue}</TableCell>
-          <TableCell className="text-xs">{fmt(c.phi_dich_vu)}</TableCell>
-          <TableCell colSpan={8} className="text-xs">{c.trang_thai}</TableCell>
-        </TableRow>
-      ))}
-    </>
+    <TableRow>
+      <TableCell colSpan={14} className="p-0">
+        <div className="animate-accordion-down overflow-hidden">
+          <div className="mx-6 my-3 rounded-lg border bg-background/50">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b bg-muted/30">
+              <span className="text-xs font-bold text-foreground">Danh sách khách hàng phụ trách</span>
+              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ backgroundColor: "#FFEBEE", color: "#B71C1C" }}>
+                Tổng: {totalClients}
+              </span>
+            </div>
+
+            {/* Sub-table */}
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/20">
+                  <TableHead className="w-12 text-center text-[10px] font-semibold">STT</TableHead>
+                  <TableHead className="min-w-[120px] text-[10px] font-semibold">
+                    <div className="flex items-center gap-1">Mã số thuế <SubSortBtn sortKey="ma_so_thue" current={subSort} onSort={handleSubSort} /></div>
+                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.ma_so_thue || ""} onChange={e => setSearch("ma_so_thue", e.target.value)} onClick={e => e.stopPropagation()} />
+                  </TableHead>
+                  <TableHead className="min-w-[250px] text-[10px] font-semibold">
+                    <div className="flex items-center gap-1">Tên khách hàng <SubSortBtn sortKey="ten" current={subSort} onSort={handleSubSort} /></div>
+                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.ten || ""} onChange={e => setSearch("ten", e.target.value)} onClick={e => e.stopPropagation()} />
+                  </TableHead>
+                  <TableHead className="min-w-[120px] text-[10px] font-semibold">
+                    <div className="flex items-center gap-1">Nhóm KH <SubSortBtn sortKey="nhom_khach_hang" current={subSort} onSort={handleSubSort} /></div>
+                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.nhom_khach_hang || ""} onChange={e => setSearch("nhom_khach_hang", e.target.value)} onClick={e => e.stopPropagation()} />
+                  </TableHead>
+                  <TableHead className="min-w-[110px] text-[10px] font-semibold text-right">
+                    <div className="flex items-center justify-end gap-1">Giá trị HĐ <SubSortBtn sortKey="gia_tri_hop_dong" current={subSort} onSort={handleSubSort} /></div>
+                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.gia_tri_hop_dong || ""} onChange={e => setSearch("gia_tri_hop_dong", e.target.value)} onClick={e => e.stopPropagation()} />
+                  </TableHead>
+                  <TableHead className="min-w-[100px] text-[10px] font-semibold">
+                    <div className="flex items-center gap-1">NV hỗ trợ</div>
+                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.nhan_vien_ho_tro || ""} onChange={e => setSearch("nhan_vien_ho_tro", e.target.value)} onClick={e => e.stopPropagation()} />
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredClients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-4 text-xs">Không có khách hàng</TableCell>
+                  </TableRow>
+                ) : (
+                  filteredClients.map((c, i) => (
+                    <TableRow key={c.id} className="hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => navigate(`/khach-hang`)}>
+                      <TableCell className="text-center text-[11px] tabular-nums">{i + 1}</TableCell>
+                      <TableCell>
+                        <button className="text-[11px] font-mono text-primary hover:underline" onClick={(e) => copyTaxCode(c.ma_so_thue, e)}>
+                          {c.ma_so_thue}
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-primary-foreground shrink-0" style={{ backgroundColor: c.avatar_color }}>
+                            {c.ten.charAt(0)}
+                          </div>
+                          <span className="text-[11px] font-medium truncate">{c.ten}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-[11px]">{c.nhom_khach_hang}</TableCell>
+                      <TableCell className="text-right text-[11px] tabular-nums">{fmt(c.gia_tri_hop_dong)}</TableCell>
+                      <TableCell>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-primary-foreground" style={{ backgroundColor: c.nhan_vien_ho_tro_color }}>
+                          {c.nhan_vien_ho_tro}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
 
