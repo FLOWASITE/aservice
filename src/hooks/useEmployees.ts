@@ -68,7 +68,11 @@ export function useCreateEmployee() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: EmployeeCreatePayload) => {
-      if (USE_MOCK) { await delay(); return { id: Date.now(), ...payload } as any; }
+      if (USE_MOCK) {
+        await delay();
+        const { addEmployeeToMock } = await import("@/mocks/employeeMock");
+        return addEmployeeToMock(payload);
+      }
       return employeeService.createEmployee(payload);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
