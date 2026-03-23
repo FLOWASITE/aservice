@@ -70,21 +70,17 @@ function ExpandedRow({ employeeId }: { employeeId: number }) {
   const filteredClients = useMemo(() => {
     if (!clients) return [];
     let list = [...clients];
-    // Column filters
-    Object.entries(subSearch).forEach(([col, val]) => {
-      if (!val) return;
-      const q = val.toLowerCase();
-      list = list.filter(c => {
-        switch (col) {
-          case "ma_so_thue": return c.ma_so_thue.includes(q);
-          case "ten": return c.ten.toLowerCase().includes(q);
-          case "nhom_khach_hang": return c.nhom_khach_hang.toLowerCase().includes(q);
-          case "gia_tri_hop_dong": return fmt(c.gia_tri_hop_dong).includes(q);
-          case "nhan_vien_ho_tro": return c.nhan_vien_ho_tro.toLowerCase().includes(q);
-          default: return true;
-        }
-      });
-    });
+    // Global search
+    const globalQ = (subSearch._global || "").toLowerCase();
+    if (globalQ) {
+      list = list.filter(c =>
+        c.ma_so_thue.includes(globalQ) ||
+        c.ten.toLowerCase().includes(globalQ) ||
+        c.nhom_khach_hang.toLowerCase().includes(globalQ) ||
+        fmt(c.gia_tri_hop_dong).includes(globalQ) ||
+        c.nhan_vien_ho_tro.toLowerCase().includes(globalQ)
+      );
+    }
     // Sort
     if (subSort) {
       list.sort((a, b) => {
