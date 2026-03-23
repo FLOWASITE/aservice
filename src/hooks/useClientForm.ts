@@ -60,7 +60,7 @@ export function useCreateClient() {
 
       const newId = Date.now();
       const initial = payload.name.charAt(0) || "?";
-      const status: ClientStatus = "dang_thuc_hien_ke_toan";
+      const status: ClientStatus = "cho_thuc_hien";
 
       const newClient: Client = {
         id: newId,
