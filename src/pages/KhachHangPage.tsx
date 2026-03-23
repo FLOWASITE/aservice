@@ -172,7 +172,7 @@ export default function KhachHangPage() {
         showCreateContract={activeTab === "cho_thuc_hien"}
         onEditClient={handleEditClient}
         onDeleteClient={(client) => console.log("Delete client", client.id)}
-        onCreateContract={() => setContractModalOpen(true)}
+        onCreateContract={(client) => { setContractClientId(client.id); setContractModalOpen(true); }}
       />
 
       <AddClientModal open={addModalOpen} onOpenChange={handleModalClose} editClient={editClient} />
