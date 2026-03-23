@@ -51,6 +51,9 @@ function generateClients(status: ClientStatus, count: number, startStt: number):
     const nameIdx = (startStt + i) % NAMES.length;
     const initial = NAMES[nameIdx].charAt(NAMES[nameIdx].lastIndexOf(" ") + 1) || NAMES[nameIdx].charAt(0);
     const apps = APP_COMBOS[i % APP_COMBOS.length];
+    const hddt: Client["hoa_don_dien_tu"] = (["da_ket_noi", "chua_ket_noi", "het_han"] as const)[i % 3];
+    const tdt: Client["thue_dien_tu"] = (["da_nop", "chua_nop", "qua_han"] as const)[i % 3];
+    const cks: Client["chu_ky_so"] = (["con_han", "het_han", "chua_dang_ky"] as const)[i % 3];
     return {
       id: startStt + i,
       stt: startStt + i,
@@ -65,6 +68,9 @@ function generateClients(status: ClientStatus, count: number, startStt: number):
       phi_dich_vu_toi_da: 0,
       cong_no: 0,
       hoa_don_di: 0,
+      hoa_don_dien_tu: hddt,
+      thue_dien_tu: tdt,
+      chu_ky_so: cks,
       trang_thai: status,
       avatar_color: AVATAR_COLORS[i % AVATAR_COLORS.length],
     };
