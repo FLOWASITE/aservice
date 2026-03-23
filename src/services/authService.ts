@@ -3,8 +3,29 @@ import type { KeycloakTokenResponse, JwtPayload, AuthUser, AppRole } from "@/typ
 const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL || "http://localhost:8080/auth";
 const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM || "master";
 const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || "aservice";
+const USE_MOCK = !import.meta.env.VITE_KEYCLOAK_URL;
 
 const TOKEN_ENDPOINT = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
+
+// Mock accounts for development
+const MOCK_ACCOUNTS = [
+  { username: "duyvp@gmail.com", password: "123456", displayName: "Duy VP", roles: ["admin"] },
+  { username: "manager@gmail.com", password: "123456", displayName: "Manager", roles: ["manager"] },
+  { username: "nhanvien@gmail.com", password: "123456", displayName: "Nhân viên", roles: ["nhanvien"] },
+];
+
+function createMockJwt(account: typeof MOCK_ACCOUNTS[0]): string {
+  const header = btoa(JSON.stringify({ alg: "none", typ: "JWT" }));
+  const payload = btoa(JSON.stringify({
+    sub: crypto.randomUUID(),
+    preferred_username: account.displayName,
+    email: account.username,
+    realm_access: { roles: account.roles },
+    exp: Math.floor(Date.now() / 1000) + 3600,
+    iat: Math.floor(Date.now() / 1000),
+  }));
+  return `${header}.${payload}.mock-signature`;
+}
 
 function decodeJwt(token: string): JwtPayload {
   const base64Url = token.split(".")[1];
