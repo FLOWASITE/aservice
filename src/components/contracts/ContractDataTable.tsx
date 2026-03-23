@@ -115,7 +115,7 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
                 <TableHead className="min-w-[170px]">NV phụ trách</TableHead>
                 <TableHead className="min-w-[140px]">NV hỗ trợ</TableHead>
                 <TableHead className="min-w-[170px]">Dịch vụ</TableHead>
-                <TableHead className="w-24 text-center">Thao tác</TableHead>
+                <TableHead className="w-24 text-center sticky right-0 bg-muted/50 z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]">Thao tác</TableHead>
               </TableRow>
               {/* Filter row */}
               <TableRow className="bg-muted/20">
@@ -158,7 +158,7 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
                 <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.staffName} onChange={e => setFilter("staffName", e.target.value)} /></TableHead>
                 <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.supportName} onChange={e => setFilter("supportName", e.target.value)} /></TableHead>
                 <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.serviceName} onChange={e => setFilter("serviceName", e.target.value)} /></TableHead>
-                <TableHead />
+                <TableHead className="sticky right-0 bg-muted/20 z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -218,7 +218,7 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{c.serviceName}</TableCell>
-                    <TableCell>
+                    <TableCell className="sticky right-0 bg-card z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                       <div className="flex items-center justify-center gap-1">
                         <button className="p-1.5 rounded-full hover:bg-primary/10" title="Xem"><Eye className="h-4 w-4 text-primary" /></button>
                         <button className="p-1.5 rounded-full hover:bg-primary/10" title="Sửa"><Edit className="h-4 w-4 text-primary" /></button>
