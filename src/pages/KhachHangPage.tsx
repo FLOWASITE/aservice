@@ -5,9 +5,6 @@ import { ClientDataTable } from "@/components/clients/ClientDataTable";
 import { AddClientModal } from "@/components/clients/AddClientModal";
 import { CreateContractModal } from "@/components/contracts/CreateContractModal";
 import type { ClientStatus, Client } from "@/types/client";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -15,12 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Plus, FileDown, Users } from "lucide-react";
 
 const TABS: { value: ClientStatus; label: string }[] = [
   { value: "cho_thuc_hien", label: "Chờ thực hiện" },
-  { value: "dang_thuc_hien_ke_toan", label: "Đang thực hiện dịch vụ kế toán" },
-  { value: "dang_thuc_hien_ke_toan_khac", label: "Đang thực hiện dịch vụ kế toán khác" },
+  { value: "dang_thuc_hien_ke_toan", label: "DV Kế toán" },
+  { value: "dang_thuc_hien_ke_toan_khac", label: "DV Kế toán khác" },
   { value: "ngung_thuc_hien", label: "Ngừng thực hiện" },
 ];
 
@@ -30,7 +28,6 @@ const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
 export default function KhachHangPage() {
   const [activeTab, setActiveTab] = useState<ClientStatus>("dang_thuc_hien_ke_toan");
-  const [search, setSearch] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(currentYear);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -50,14 +47,9 @@ export default function KhachHangPage() {
 
   const { data, isLoading } = useClients({
     status: activeTab,
-    search: search || undefined,
     month,
     year,
   });
-
-  const handleSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-  }, []);
 
   const stats = data?.stats || {
     khach_hang_da_dang_ky: 0,
@@ -75,92 +67,87 @@ export default function KhachHangPage() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Khách hàng</h1>
+    <div className="space-y-5">
+      {/* Page header */}
+      <div className="page-header">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Users className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="page-title">Khách hàng</h1>
+            <p className="page-subtitle">Quản lý danh sách và thông tin khách hàng</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="h-9 gap-1.5">
+            <FileDown className="h-4 w-4" />
+            Xuất dữ liệu
+          </Button>
+          <Button size="sm" className="h-9 gap-1.5" onClick={() => setAddModalOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Thêm khách hàng
+          </Button>
         </div>
       </div>
 
       {/* Stat cards */}
       <ClientStatCards stats={stats} />
 
-      {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as ClientStatus)}
-      >
-        <TabsList className="bg-muted/50 h-auto flex-wrap gap-1 p-1">
+      {/* Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Tabs as pills */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60">
           {TABS.map((tab) => (
-            <TabsTrigger
+            <button
               key={tab.value}
-              value={tab.value}
-              className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm px-3 py-2"
+              onClick={() => setActiveTab(tab.value)}
+              className={`tab-pill ${
+                activeTab === tab.value ? "tab-pill-active" : "tab-pill-inactive"
+              }`}
             >
-              {tab.label} ({tabCounts[tab.value]})
-            </TabsTrigger>
+              {tab.label}
+              <span
+                className={`inline-flex items-center justify-center rounded-md min-w-[20px] h-[18px] px-1 text-[10px] font-bold ${
+                  activeTab === tab.value
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {tabCounts[tab.value]}
+              </span>
+            </button>
           ))}
-        </TabsList>
-      </Tabs>
+        </div>
 
-      {/* Filters row */}
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm font-medium text-foreground">Khách hàng</span>
-
-        <Select value={month.toString()} onValueChange={(v) => setMonth(Number(v))}>
-          <SelectTrigger className="w-[120px] h-9">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MONTHS.map((m) => (
-              <SelectItem key={m} value={m.toString()}>
-                Tháng {m}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={year.toString()} onValueChange={(v) => setYear(Number(v))}>
-          <SelectTrigger className="w-[100px] h-9">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {YEARS.map((y) => (
-              <SelectItem key={y} value={y.toString()}>
-                {y}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm kiếm"
-              className="pl-9 h-9 w-[200px]"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Button type="submit" size="sm" className="h-9">
-            <Search className="h-4 w-4 mr-1" />
-            Tìm kiếm
-          </Button>
-        </form>
-
-        <div className="ml-auto flex gap-2">
-          <Button variant="outline" size="sm" className="h-9" onClick={() => setAddModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-1" />
-            Thêm khách hàng
-          </Button>
-          <Button variant="outline" size="sm" className="h-9">
-            <FileDown className="h-4 w-4 mr-1" />
-            Xuất dữ liệu
-          </Button>
-          <span className="flex items-center text-sm text-muted-foreground">
-            Tổng: <strong className="ml-1 text-foreground">{data?.total || 0}</strong>
+        {/* Filters */}
+        <div className="flex items-center gap-2">
+          <Select value={month.toString()} onValueChange={(v) => setMonth(Number(v))}>
+            <SelectTrigger className="w-[110px] h-8 text-xs rounded-lg">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((m) => (
+                <SelectItem key={m} value={m.toString()}>
+                  Tháng {m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={year.toString()} onValueChange={(v) => setYear(Number(v))}>
+            <SelectTrigger className="w-[90px] h-8 text-xs rounded-lg">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {YEARS.map((y) => (
+                <SelectItem key={y} value={y.toString()}>
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-muted-foreground ml-1">
+            Tổng: <strong className="text-foreground">{data?.total || 0}</strong>
           </span>
         </div>
       </div>

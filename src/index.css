@@ -6,79 +6,94 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 220 20% 97%;
+    --foreground: 220 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 220 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 220 25% 12%;
 
-    --primary: 215 70% 42%;
+    --primary: 220 72% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 25% 93%;
-    --secondary-foreground: 215 25% 20%;
+    --secondary: 220 20% 94%;
+    --secondary-foreground: 220 25% 18%;
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 215 12% 50%;
+    --muted: 220 16% 95%;
+    --muted-foreground: 220 10% 48%;
 
-    --accent: 195 70% 45%;
+    --accent: 195 72% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 215 70% 42%;
+    --border: 220 16% 90%;
+    --input: 220 16% 88%;
+    --ring: 220 72% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --sidebar-background: 215 30% 16%;
-    --sidebar-foreground: 210 15% 75%;
-    --sidebar-primary: 210 60% 65%;
+    --sidebar-background: 220 32% 14%;
+    --sidebar-foreground: 220 12% 72%;
+    --sidebar-primary: 215 60% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 22%;
-    --sidebar-accent-foreground: 210 15% 90%;
-    --sidebar-border: 215 20% 22%;
-    --sidebar-ring: 215 70% 42%;
+    --sidebar-accent: 220 22% 20%;
+    --sidebar-accent-foreground: 220 12% 88%;
+    --sidebar-border: 220 18% 20%;
+    --sidebar-ring: 220 72% 45%;
 
-    --success: 152 60% 42%;
+    --success: 152 60% 40%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+
+    /* Premium tokens */
+    --glass: 0 0% 100% / 0.7;
+    --glass-border: 220 16% 90% / 0.6;
+    --shadow-sm: 0 1px 2px 0 hsl(220 25% 12% / 0.04);
+    --shadow-md: 0 4px 12px -2px hsl(220 25% 12% / 0.08), 0 2px 4px -2px hsl(220 25% 12% / 0.04);
+    --shadow-lg: 0 8px 24px -4px hsl(220 25% 12% / 0.1), 0 4px 8px -4px hsl(220 25% 12% / 0.06);
+    --shadow-xl: 0 16px 40px -8px hsl(220 25% 12% / 0.12), 0 8px 16px -8px hsl(220 25% 12% / 0.08);
   }
 
   .dark {
-    --background: 215 25% 10%;
-    --foreground: 210 15% 90%;
-    --card: 215 25% 13%;
-    --card-foreground: 210 15% 90%;
-    --popover: 215 25% 13%;
-    --popover-foreground: 210 15% 90%;
-    --primary: 210 60% 55%;
+    --background: 220 25% 8%;
+    --foreground: 220 12% 90%;
+    --card: 220 25% 11%;
+    --card-foreground: 220 12% 90%;
+    --popover: 220 25% 11%;
+    --popover-foreground: 220 12% 90%;
+    --primary: 215 62% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 215 20% 20%;
-    --secondary-foreground: 210 15% 90%;
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 12% 55%;
-    --accent: 195 60% 50%;
+    --secondary: 220 18% 18%;
+    --secondary-foreground: 220 12% 90%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 220 10% 52%;
+    --accent: 195 60% 48%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 210 60% 55%;
-    --sidebar-background: 215 30% 10%;
-    --sidebar-foreground: 210 15% 70%;
-    --sidebar-primary: 210 60% 60%;
+    --border: 220 18% 18%;
+    --input: 220 18% 18%;
+    --ring: 215 62% 52%;
+    --sidebar-background: 220 32% 8%;
+    --sidebar-foreground: 220 12% 68%;
+    --sidebar-primary: 215 60% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 16%;
-    --sidebar-accent-foreground: 210 15% 85%;
-    --sidebar-border: 215 20% 16%;
-    --sidebar-ring: 210 60% 55%;
+    --sidebar-accent: 220 22% 14%;
+    --sidebar-accent-foreground: 220 12% 84%;
+    --sidebar-border: 220 18% 14%;
+    --sidebar-ring: 215 62% 52%;
+
+    --glass: 220 25% 11% / 0.7;
+    --glass-border: 220 18% 18% / 0.6;
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.35);
+    --shadow-xl: 0 16px 40px -8px hsl(0 0% 0% / 0.4);
   }
 }
 
@@ -90,5 +105,82 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Be Vietnam Pro', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Premium card */
+  .premium-card {
+    @apply rounded-xl border bg-card p-4 transition-all duration-200;
+    box-shadow: var(--shadow-sm);
+  }
+  .premium-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* Glass panel */
+  .glass-panel {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border));
+    @apply rounded-xl;
+  }
+
+  /* Premium table */
+  .premium-table-wrapper {
+    @apply rounded-xl border bg-card overflow-hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Premium search */
+  .premium-search {
+    @apply rounded-lg border bg-card transition-all duration-200;
+    box-shadow: var(--shadow-sm);
+  }
+  .premium-search:focus-within {
+    box-shadow: var(--shadow-md);
+    @apply border-primary/30 ring-2 ring-primary/10;
+  }
+
+  /* Stat card gradient overlays */
+  .stat-gradient-blue {
+    background: linear-gradient(135deg, hsl(220 72% 45% / 0.08) 0%, hsl(220 72% 45% / 0.02) 100%);
+  }
+  .stat-gradient-teal {
+    background: linear-gradient(135deg, hsl(195 72% 42% / 0.08) 0%, hsl(195 72% 42% / 0.02) 100%);
+  }
+  .stat-gradient-green {
+    background: linear-gradient(135deg, hsl(152 60% 40% / 0.08) 0%, hsl(152 60% 40% / 0.02) 100%);
+  }
+  .stat-gradient-amber {
+    background: linear-gradient(135deg, hsl(38 92% 50% / 0.08) 0%, hsl(38 92% 50% / 0.02) 100%);
+  }
+  .stat-gradient-red {
+    background: linear-gradient(135deg, hsl(0 72% 51% / 0.08) 0%, hsl(0 72% 51% / 0.02) 100%);
+  }
+
+  /* Premium page header */
+  .page-header {
+    @apply flex items-center justify-between pb-2;
+  }
+  .page-title {
+    @apply text-xl font-bold tracking-tight text-foreground;
+  }
+  .page-subtitle {
+    @apply text-xs text-muted-foreground mt-0.5;
+  }
+
+  /* Tab pill style */
+  .tab-pill {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 cursor-pointer select-none;
+  }
+  .tab-pill-active {
+    @apply bg-primary text-primary-foreground shadow-sm;
+  }
+  .tab-pill-inactive {
+    @apply text-muted-foreground hover:text-foreground hover:bg-muted;
   }
 }

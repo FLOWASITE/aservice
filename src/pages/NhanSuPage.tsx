@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search } from "lucide-react";
+import { Plus, UserCog } from "lucide-react";
 import { EmployeeStatCards } from "@/components/employees/EmployeeStatCards";
 import { EmployeeDataTable } from "@/components/employees/EmployeeDataTable";
 import { AddEmployeeModal } from "@/components/employees/AddEmployeeModal";
@@ -26,7 +25,6 @@ export default function NhanSuPage() {
   const [mainTab, setMainTab] = useState("nhan_su");
   const [statusTab, setStatusTab] = useState<EmployeeStatus>("dang_lam_viec");
   const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(currentYear);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -36,11 +34,6 @@ export default function NhanSuPage() {
   const { data: employees, isLoading } = useEmployees(statusTab, search || undefined);
   const { data: totals } = useEmployeeTotals();
   const deleteMutation = useDeleteEmployee();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearch(searchInput);
-  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -56,72 +49,65 @@ export default function NhanSuPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-foreground">Nhân sự</h1>
+      {/* Page header */}
+      <div className="page-header">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <UserCog className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="page-title">Nhân sự</h1>
+            <p className="page-subtitle">Quản lý nhân viên và nhóm làm việc</p>
+          </div>
+        </div>
+        <Button size="sm" className="h-9 gap-1.5" onClick={() => setAddModalOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Thêm mới
+        </Button>
+      </div>
 
       <Tabs value={mainTab} onValueChange={setMainTab}>
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="nhan_su">Nhân sự</TabsTrigger>
-          <TabsTrigger value="nhom">Nhóm</TabsTrigger>
+        <TabsList className="glass-panel p-1 h-auto">
+          <TabsTrigger value="nhan_su" className="rounded-lg text-xs data-[state=active]:shadow-sm">Nhân sự</TabsTrigger>
+          <TabsTrigger value="nhom" className="rounded-lg text-xs data-[state=active]:shadow-sm">Nhóm</TabsTrigger>
         </TabsList>
 
         <TabsContent value="nhan_su" className="space-y-5 mt-5">
           {/* Stat cards */}
           <EmployeeStatCards stats={stats || defaultStats} />
 
-          {/* Controls section */}
-          <div className="space-y-2">
-            {/* Row 1: Status tabs + Search */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                {STATUS_TABS.map((t) => {
-                  const isActive = statusTab === t.value;
-                  const count = (tabCounts || defaultCounts)[t.value];
-                  return (
-                    <button
-                      key={t.value}
-                      onClick={() => setStatusTab(t.value)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+          {/* Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Status tabs as pills */}
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60">
+              {STATUS_TABS.map((t) => {
+                const isActive = statusTab === t.value;
+                const count = (tabCounts || defaultCounts)[t.value];
+                return (
+                  <button
+                    key={t.value}
+                    onClick={() => setStatusTab(t.value)}
+                    className={`tab-pill ${isActive ? "tab-pill-active" : "tab-pill-inactive"}`}
+                  >
+                    {t.label}
+                    <span
+                      className={`inline-flex items-center justify-center rounded-md min-w-[20px] h-[18px] px-1 text-[10px] font-bold ${
                         isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {t.label}
-                      <span
-                        className={`inline-flex items-center justify-center rounded-full min-w-[18px] h-4 px-1 text-[10px] font-semibold ${
-                          isActive
-                            ? "bg-primary-foreground/20 text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input
-                    className="pl-7 h-7 w-[160px] text-xs"
-                    placeholder="Tìm kiếm..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" size="sm" className="h-7 text-xs px-3 bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                  Tìm kiếm
-                </Button>
-              </form>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Row 2: Filters + Total + Add */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-medium text-foreground">Nhân sự</span>
+            {/* Filters */}
+            <div className="flex items-center gap-2">
               <Select value={month.toString()} onValueChange={(v) => setMonth(parseInt(v))}>
-                <SelectTrigger className="w-[100px] h-7 text-xs">
+                <SelectTrigger className="w-[110px] h-8 text-xs rounded-lg">
                   <SelectValue placeholder="Tháng" />
                 </SelectTrigger>
                 <SelectContent>
@@ -131,7 +117,7 @@ export default function NhanSuPage() {
                 </SelectContent>
               </Select>
               <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
-                <SelectTrigger className="w-[80px] h-7 text-xs">
+                <SelectTrigger className="w-[90px] h-8 text-xs rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,30 +126,22 @@ export default function NhanSuPage() {
                   ))}
                 </SelectContent>
               </Select>
-
-              <span className="text-xs text-muted-foreground ml-auto">
+              <span className="text-xs text-muted-foreground ml-1">
                 Tổng: <strong className="text-foreground">{employees?.length || 0}</strong>
               </span>
-              <Button
-                size="sm"
-                onClick={() => setAddModalOpen(true)}
-                className="h-7 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" /> Thêm mới
-              </Button>
             </div>
           </div>
 
           {/* Data table */}
           <EmployeeDataTable employees={employees || []} isLoading={isLoading} totals={totals} onDelete={handleDelete} />
-
-          <AddEmployeeModal open={addModalOpen} onOpenChange={setAddModalOpen} />
         </TabsContent>
 
         <TabsContent value="nhom" className="mt-5">
           <GroupsTab />
         </TabsContent>
       </Tabs>
+
+      <AddEmployeeModal open={addModalOpen} onOpenChange={setAddModalOpen} />
     </div>
   );
 }
