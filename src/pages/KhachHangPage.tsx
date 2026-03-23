@@ -3,7 +3,7 @@ import { useClients } from "@/hooks/useClients";
 import { ClientStatCards } from "@/components/clients/ClientStatCards";
 import { ClientDataTable } from "@/components/clients/ClientDataTable";
 import { AddClientModal } from "@/components/clients/AddClientModal";
-import type { ClientStatus } from "@/types/client";
+import type { ClientStatus, Client } from "@/types/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,17 @@ export default function KhachHangPage() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(currentYear);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editClient, setEditClient] = useState<Client | null>(null);
+
+  const handleEditClient = useCallback((client: Client) => {
+    setEditClient(client);
+    setAddModalOpen(true);
+  }, []);
+
+  const handleModalClose = useCallback((open: boolean) => {
+    setAddModalOpen(open);
+    if (!open) setEditClient(null);
+  }, []);
 
   const { data, isLoading } = useClients({
     status: activeTab,
@@ -152,9 +163,9 @@ export default function KhachHangPage() {
       </div>
 
       {/* Data table */}
-      <ClientDataTable clients={data?.data || []} isLoading={isLoading} />
+      <ClientDataTable clients={data?.data || []} isLoading={isLoading} onEditClient={handleEditClient} />
 
-      <AddClientModal open={addModalOpen} onOpenChange={setAddModalOpen} />
+      <AddClientModal open={addModalOpen} onOpenChange={handleModalClose} editClient={editClient} />
     </div>
   );
 }

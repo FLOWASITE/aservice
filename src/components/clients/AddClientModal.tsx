@@ -14,17 +14,9 @@ import { ApplicationSection } from "./sections/ApplicationSection";
 import { useCreateClient } from "@/hooks/useClientForm";
 import { toast } from "sonner";
 import type { ClientCreatePayload } from "@/types/clientForm";
+import type { Client } from "@/types/client";
 
 const DRAFT_KEY = "add_client_draft";
-
-function loadDraft(): Record<string, any> {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    return raw ? JSON.parse(raw) : getDefaultForm();
-  } catch {
-    return getDefaultForm();
-  }
-}
 
 function getDefaultForm(): Record<string, any> {
   return {
@@ -42,26 +34,59 @@ function getDefaultForm(): Record<string, any> {
   };
 }
 
+function clientToForm(client: Client): Record<string, any> {
+  return {
+    ...getDefaultForm(),
+    taxCode: client.id.toString(),
+    name: client.ten,
+    businessType: "company",
+    address: "",
+    legalRepresentative: "",
+  };
+}
+
+function loadDraft(): Record<string, any> {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : getDefaultForm();
+  } catch {
+    return getDefaultForm();
+  }
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editClient?: Client | null;
 }
 
-export function AddClientModal({ open, onOpenChange }: Props) {
-  const [form, setForm] = useState<Record<string, any>>(loadDraft);
+export function AddClientModal({ open, onOpenChange, editClient }: Props) {
+  const isEditMode = !!editClient;
+  const [form, setForm] = useState<Record<string, any>>(getDefaultForm);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const createMutation = useCreateClient();
 
-  // Auto-save draft
+  // Initialize form when modal opens
   useEffect(() => {
     if (open) {
+      if (editClient) {
+        setForm(clientToForm(editClient));
+      } else {
+        setForm(loadDraft());
+      }
+    }
+  }, [open, editClient]);
+
+  // Auto-save draft (only for create mode)
+  useEffect(() => {
+    if (open && !isEditMode) {
       const timer = setTimeout(() => {
         localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [form, open]);
+  }, [form, open, isEditMode]);
 
   const setField = useCallback((key: string, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -78,7 +103,7 @@ export function AddClientModal({ open, onOpenChange }: Props) {
   };
 
   const confirmClose = () => {
-    localStorage.removeItem(DRAFT_KEY);
+    if (!isEditMode) localStorage.removeItem(DRAFT_KEY);
     setForm(getDefaultForm());
     setShowCloseConfirm(false);
     onOpenChange(false);
@@ -102,12 +127,12 @@ export function AddClientModal({ open, onOpenChange }: Props) {
     setShowConfirm(false);
     try {
       await createMutation.mutateAsync(form as ClientCreatePayload);
-      toast.success("Tạo khách hàng thành công!");
-      localStorage.removeItem(DRAFT_KEY);
+      toast.success(isEditMode ? "Cập nhật khách hàng thành công!" : "Tạo khách hàng thành công!");
+      if (!isEditMode) localStorage.removeItem(DRAFT_KEY);
       setForm(getDefaultForm());
       onOpenChange(false);
     } catch {
-      toast.error("Có lỗi xảy ra khi tạo khách hàng");
+      toast.error(isEditMode ? "Có lỗi xảy ra khi cập nhật khách hàng" : "Có lỗi xảy ra khi tạo khách hàng");
     }
   };
 
@@ -118,15 +143,15 @@ export function AddClientModal({ open, onOpenChange }: Props) {
     <>
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="max-w-[900px] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b bg-card">
-            <h2 className="text-lg font-semibold text-foreground">Thêm khách hàng mới</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {isEditMode ? "Chỉnh sửa khách hàng" : "Thêm khách hàng mới"}
+            </h2>
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <Accordion type="multiple" defaultValue={["basic", "accounting"]} className="space-y-3">
               <AccordionItem value="basic" className="border rounded-lg px-4">
@@ -179,7 +204,6 @@ export function AddClientModal({ open, onOpenChange }: Props) {
             </Accordion>
           </div>
 
-          {/* Sticky footer */}
           <div className="flex items-center justify-between px-6 py-4 border-t bg-card">
             <Button variant="ghost" onClick={handleClose}>Hủy</Button>
             <Button
@@ -187,17 +211,16 @@ export function AddClientModal({ open, onOpenChange }: Props) {
               disabled={createMutation.isPending}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              {createMutation.isPending ? "Đang lưu..." : "Lưu khách hàng"}
+              {createMutation.isPending ? "Đang lưu..." : isEditMode ? "Cập nhật" : "Lưu khách hàng"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation popup */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận tạo khách hàng</AlertDialogTitle>
+            <AlertDialogTitle>{isEditMode ? "Xác nhận cập nhật" : "Xác nhận tạo khách hàng"}</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-2 mt-2">
@@ -221,7 +244,6 @@ export function AddClientModal({ open, onOpenChange }: Props) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Close confirmation */}
       <AlertDialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
