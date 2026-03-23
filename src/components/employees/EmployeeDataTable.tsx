@@ -12,11 +12,6 @@ import { useEmployeeClients } from "@/hooks/useEmployees";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import type { Employee, EmployeeTotals, EmployeeClient } from "@/types/employee";
-import { Skeleton } from "@/components/ui/skeleton";
-import { usePagination } from "@/hooks/usePagination";
-import { DataPagination } from "@/components/DataPagination";
-import { useEmployeeClients } from "@/hooks/useEmployees";
-import type { Employee, EmployeeTotals } from "@/types/employee";
 
 const fmt = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 
