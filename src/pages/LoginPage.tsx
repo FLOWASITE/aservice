@@ -4,9 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { LogIn, Eye, EyeOff } from "lucide-react";
+import logoHorizontal from "@/assets/logo-horizontal.png";
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -47,10 +48,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-md shadow-lg border-border/60">
         <CardHeader className="text-center space-y-2 pb-2">
-          <div className="mx-auto w-14 h-14 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl mb-2">
-            A
-          </div>
-          <CardTitle className="text-2xl font-bold text-foreground">AService</CardTitle>
+          <img src={logoHorizontal} alt="AService" className="h-12 mx-auto mb-2 object-contain" />
           <CardDescription className="text-muted-foreground">
             Đăng nhập vào hệ thống quản lý dịch vụ kế toán
           </CardDescription>
