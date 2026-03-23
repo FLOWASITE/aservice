@@ -79,7 +79,13 @@ export function useDeleteEmployee() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      if (USE_MOCK) { await delay(); return; }
+      if (USE_MOCK) {
+        await delay();
+        // Actually remove from mock data
+        const { removeEmployeeFromMock } = await import("@/mocks/employeeMock");
+        removeEmployeeFromMock(id);
+        return;
+      }
       return employeeService.deleteEmployee(id);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
