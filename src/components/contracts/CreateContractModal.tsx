@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CalendarIcon, Upload, X } from "lucide-react";
@@ -66,7 +66,13 @@ const initialForm: ContractCreatePayload = {
 const formatCurrency = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 
 export function CreateContractModal({ open, onOpenChange, defaultClientId }: Props) {
-  const [form, setForm] = useState<ContractCreatePayload>({ ...initialForm, khach_hang_id: defaultClientId || 0 });
+  const [form, setForm] = useState<ContractCreatePayload>({ ...initialForm });
+
+  useEffect(() => {
+    if (open) {
+      setForm({ ...initialForm, khach_hang_id: defaultClientId || 0 });
+    }
+  }, [open, defaultClientId]);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [fileName, setFileName] = useState<string | null>(null);
