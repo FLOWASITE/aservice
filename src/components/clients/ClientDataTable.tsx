@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { Client } from "@/types/client";
 import { AppIcons } from "./AppIcons";
 import {
@@ -6,20 +6,17 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Eye, Edit, Trash2, PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Eye, Edit, Trash2, PlusCircle, Search, SlidersHorizontal, X, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/usePagination";
 import { DataPagination } from "@/components/DataPagination";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Props {
   clients: Client[];
@@ -33,35 +30,95 @@ interface Props {
 const formatNumber = (v: number) =>
   v === 0 ? "0" : new Intl.NumberFormat("vi-VN").format(v);
 
+type SortKey = "ten" | "nhom" | "nhan_vien_phu_trach" | "phi_dich_vu_toi_thieu" | "phi_dich_vu_toi_da" | "cong_no" | "hoa_don_di";
+type SortDir = "asc" | "desc";
+
+function SortButton({ label, sortKey, current, onSort }: { label: string; sortKey: SortKey; current: { key: SortKey; dir: SortDir } | null; onSort: (key: SortKey) => void }) {
+  const active = current?.key === sortKey;
+  const Icon = active ? (current.dir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+  return (
+    <button className="flex items-center gap-1 hover:text-foreground transition-colors" onClick={() => onSort(sortKey)}>
+      <span>{label}</span>
+      <Icon className={`h-3.5 w-3.5 ${active ? "text-primary" : "text-muted-foreground/50"}`} />
+    </button>
+  );
+}
+
 export function ClientDataTable({ clients, isLoading, showCreateContract, onEditClient, onDeleteClient, onCreateContract }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<Client | null>(null);
-  const [colSearch, setColSearch] = useState({
-    ten: "",
-    nhom: "",
-    nhan_vien: "",
-    ho_tro: "",
-    ung_dung: "",
+  const [globalSearch, setGlobalSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [advFilters, setAdvFilters] = useState({
+    feeMin: "", feeMax: "", feeMaxMin: "", feeMaxMax: "", congNoMin: "", congNoMax: "",
   });
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
 
-  const filtered = useMemo(() => {
-    return clients.filter((c) => {
-      const matchTen = !colSearch.ten || c.ten.toLowerCase().includes(colSearch.ten.toLowerCase());
-      const matchNhom = !colSearch.nhom || c.nhom.toLowerCase().includes(colSearch.nhom.toLowerCase());
-      const matchNV = !colSearch.nhan_vien || c.nhan_vien_phu_trach.toLowerCase().includes(colSearch.nhan_vien.toLowerCase());
-      return matchTen && matchNhom && matchNV;
+  const handleSort = useCallback((key: SortKey) => {
+    setSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return null;
     });
-  }, [clients, colSearch]);
+  }, []);
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(advFilters).filter(Boolean).length;
+  }, [advFilters]);
+
+  const clearFilters = useCallback(() => {
+    setAdvFilters({ feeMin: "", feeMax: "", feeMaxMin: "", feeMaxMax: "", congNoMin: "", congNoMax: "" });
+    setGlobalSearch("");
+  }, []);
+
+  const processedData = useMemo(() => {
+    let result = [...clients];
+
+    // Global search
+    if (globalSearch.trim()) {
+      const q = globalSearch.toLowerCase();
+      result = result.filter((c) =>
+        c.ten.toLowerCase().includes(q) ||
+        c.ten_viet_tat.toLowerCase().includes(q) ||
+        c.nhom.toLowerCase().includes(q) ||
+        c.nhan_vien_phu_trach.toLowerCase().includes(q) ||
+        c.nhan_vien_ho_tro.some((nv) => nv.toLowerCase().includes(q))
+      );
+    }
+
+    // Advanced filters
+    const { feeMin, feeMax, feeMaxMin, feeMaxMax, congNoMin, congNoMax } = advFilters;
+    if (feeMin) result = result.filter((c) => c.phi_dich_vu_toi_thieu >= Number(feeMin));
+    if (feeMax) result = result.filter((c) => c.phi_dich_vu_toi_thieu <= Number(feeMax));
+    if (feeMaxMin) result = result.filter((c) => c.phi_dich_vu_toi_da >= Number(feeMaxMin));
+    if (feeMaxMax) result = result.filter((c) => c.phi_dich_vu_toi_da <= Number(feeMaxMax));
+    if (congNoMin) result = result.filter((c) => c.cong_no >= Number(congNoMin));
+    if (congNoMax) result = result.filter((c) => c.cong_no <= Number(congNoMax));
+
+    // Sort
+    if (sort) {
+      const dir = sort.dir === "asc" ? 1 : -1;
+      result.sort((a, b) => {
+        let cmp = 0;
+        switch (sort.key) {
+          case "ten": cmp = a.ten.localeCompare(b.ten, "vi"); break;
+          case "nhom": cmp = a.nhom.localeCompare(b.nhom, "vi"); break;
+          case "nhan_vien_phu_trach": cmp = a.nhan_vien_phu_trach.localeCompare(b.nhan_vien_phu_trach, "vi"); break;
+          case "phi_dich_vu_toi_thieu": cmp = a.phi_dich_vu_toi_thieu - b.phi_dich_vu_toi_thieu; break;
+          case "phi_dich_vu_toi_da": cmp = a.phi_dich_vu_toi_da - b.phi_dich_vu_toi_da; break;
+          case "cong_no": cmp = a.cong_no - b.cong_no; break;
+          case "hoa_don_di": cmp = a.hoa_don_di - b.hoa_don_di; break;
+        }
+        return cmp * dir;
+      });
+    }
+
+    return result;
+  }, [clients, globalSearch, advFilters, sort]);
 
   const {
-    paginatedData,
-    currentPage,
-    pageSize,
-    totalPages,
-    totalItems,
-    pageSizeOptions,
-    goToPage,
-    setPageSize,
-  } = usePagination(filtered);
+    paginatedData, currentPage, pageSize, totalPages, totalItems,
+    pageSizeOptions, goToPage, setPageSize,
+  } = usePagination(processedData);
 
   if (isLoading) {
     return (
@@ -73,8 +130,78 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
     );
   }
 
+  const hasFilters = globalSearch || activeFilterCount > 0;
+
   return (
-    <div className="space-y-0">
+    <div className="space-y-3">
+      {/* Search & Filter bar */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-md">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm kiếm tên, nhóm, nhân viên..."
+            className="pl-9 h-9"
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
+          />
+        </div>
+
+        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+              <SlidersHorizontal className="h-4 w-4" />
+              Bộ lọc nâng cao
+              {activeFilterCount > 0 && (
+                <span className="ml-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </Collapsible>
+
+        {hasFilters && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Kết quả: <strong className="text-foreground">{processedData.length}</strong> / {clients.length}
+            </span>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={clearFilters}>
+              <X className="h-3 w-3" /> Xóa lọc
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Advanced Filters Panel */}
+      <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <CollapsibleContent>
+          <div className="border rounded-lg p-4 bg-muted/30 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Phí tối thiểu (Min - Max)</label>
+              <div className="flex gap-2">
+                <Input type="number" placeholder="Min" className="h-8 text-xs" value={advFilters.feeMin} onChange={(e) => setAdvFilters((p) => ({ ...p, feeMin: e.target.value }))} />
+                <Input type="number" placeholder="Max" className="h-8 text-xs" value={advFilters.feeMax} onChange={(e) => setAdvFilters((p) => ({ ...p, feeMax: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Phí tối đa (Min - Max)</label>
+              <div className="flex gap-2">
+                <Input type="number" placeholder="Min" className="h-8 text-xs" value={advFilters.feeMaxMin} onChange={(e) => setAdvFilters((p) => ({ ...p, feeMaxMin: e.target.value }))} />
+                <Input type="number" placeholder="Max" className="h-8 text-xs" value={advFilters.feeMaxMax} onChange={(e) => setAdvFilters((p) => ({ ...p, feeMaxMax: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Công nợ (Min - Max)</label>
+              <div className="flex gap-2">
+                <Input type="number" placeholder="Min" className="h-8 text-xs" value={advFilters.congNoMin} onChange={(e) => setAdvFilters((p) => ({ ...p, congNoMin: e.target.value }))} />
+                <Input type="number" placeholder="Max" className="h-8 text-xs" value={advFilters.congNoMax} onChange={(e) => setAdvFilters((p) => ({ ...p, congNoMax: e.target.value }))} />
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Table */}
       <div className="border rounded-lg overflow-hidden bg-card">
         <div className="overflow-x-auto">
           <Table>
@@ -82,44 +209,26 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
               <TableRow className="bg-muted/50">
                 <TableHead className="w-14 text-center">STT</TableHead>
                 <TableHead className="min-w-[280px]">
-                  <div className="space-y-1">
-                    <span>Tên*</span>
-                    <Input
-                      placeholder="Tìm kiếm"
-                      className="h-7 text-xs"
-                      value={colSearch.ten}
-                      onChange={(e) => setColSearch((p) => ({ ...p, ten: e.target.value }))}
-                    />
-                  </div>
+                  <SortButton label="Tên" sortKey="ten" current={sort} onSort={handleSort} />
                 </TableHead>
                 <TableHead className="min-w-[130px]">
-                  <div className="space-y-1">
-                    <span>Nhóm*</span>
-                    <Input
-                      placeholder="Vui lòng chọn"
-                      className="h-7 text-xs"
-                      value={colSearch.nhom}
-                      onChange={(e) => setColSearch((p) => ({ ...p, nhom: e.target.value }))}
-                    />
-                  </div>
+                  <SortButton label="Nhóm" sortKey="nhom" current={sort} onSort={handleSort} />
                 </TableHead>
                 <TableHead className="min-w-[180px]">
-                  <div className="space-y-1">
-                    <span>Nhân viên phụ trách*</span>
-                    <Input
-                      placeholder="Vui lòng chọn"
-                      className="h-7 text-xs"
-                      value={colSearch.nhan_vien}
-                      onChange={(e) => setColSearch((p) => ({ ...p, nhan_vien: e.target.value }))}
-                    />
-                  </div>
+                  <SortButton label="NV phụ trách" sortKey="nhan_vien_phu_trach" current={sort} onSort={handleSort} />
                 </TableHead>
-                <TableHead className="min-w-[130px]">Nhân viên hỗ tr...</TableHead>
+                <TableHead className="min-w-[130px]">NV hỗ trợ</TableHead>
                 <TableHead className="w-20 text-center">Ứng dụng</TableHead>
-                <TableHead className="text-right min-w-[100px]">Tối thiểu</TableHead>
-                <TableHead className="text-right min-w-[100px]">Tối đa</TableHead>
-                <TableHead className="text-right min-w-[80px]">Công nợ</TableHead>
-                <TableHead className="text-center min-w-[80px]">Hoá đơn</TableHead>
+                <TableHead className="text-right min-w-[100px]">
+                  <SortButton label="Tối thiểu" sortKey="phi_dich_vu_toi_thieu" current={sort} onSort={handleSort} />
+                </TableHead>
+                <TableHead className="text-right min-w-[100px]">
+                  <SortButton label="Tối đa" sortKey="phi_dich_vu_toi_da" current={sort} onSort={handleSort} />
+                </TableHead>
+                <TableHead className="text-right min-w-[80px]">
+                  <SortButton label="Công nợ" sortKey="cong_no" current={sort} onSort={handleSort} />
+                </TableHead>
+                <TableHead className="text-center min-w-[80px]">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -139,16 +248,11 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
                       <div className="flex items-center gap-2">
                         <div
                           className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
-                          style={{
-                            backgroundColor: client.avatar_color,
-                            color: "white",
-                          }}
+                          style={{ backgroundColor: client.avatar_color, color: "white" }}
                         >
                           {client.ten_viet_tat}
                         </div>
-                        <span className="text-sm font-medium truncate max-w-[260px]">
-                          {client.ten}
-                        </span>
+                        <span className="text-sm font-medium truncate max-w-[260px]">{client.ten}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{client.nhom}</TableCell>
