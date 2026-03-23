@@ -8,7 +8,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import logoAketoan from "@/assets/logo-aketoan.png";
 import logoAmall from "@/assets/logo-amall.png";
 import logoAread from "@/assets/logo-aread.png";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
