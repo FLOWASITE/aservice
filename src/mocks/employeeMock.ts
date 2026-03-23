@@ -77,13 +77,41 @@ export function getMockEmployeeTotals(): EmployeeTotals {
   };
 }
 
+const CLIENT_NAMES = [
+  "CÔNG TY TNHH ĐƯỜNG SINH MỸ CÁT",
+  "CÔNG TY TNHH ĐẦU TƯ & THƯƠNG MẠI HƯNG VẠN PHÁT",
+  "CÔNG TY TNHH FVTOURIST",
+  "CÔNG TY TNHH CONNECTX TECHNOLOGY",
+  "CÔNG TY TNHH XÂY DỰNG VÀ DỊCH VỤ NGỌC XUÂN",
+  "CÔNG TY TNHH JOY LIFE",
+  "CÔNG TY TNHH XUẤT NHẬP KHẨU UYÊN THƯ",
+  "TRƯỜNG MẦM NON HỌC VIỆN SÀI GÒN",
+  "CÔNG TY TNHH LUCKY VN STAR",
+  "CÔNG TY TNHH TM DV HOÀNG PHÚC GIA",
+  "CÔNG TY TNHH SẢN XUẤT BAO BÌ TÂN PHÁT",
+  "CÔNG TY TNHH THƯƠNG MẠI MINH ĐẠT",
+];
+const TAX_CODES = [
+  "0317505793", "0316365906", "0311961221", "0318056822",
+  "4101580900", "0316079493", "0317892165", "0314160068",
+  "0317881445", "0315234567", "0319876543", "0312345678",
+];
+const CONTRACT_VALUES = [500000, 3300000, 1000000, 500000, 1000000, 3000000, 700000, 6000000, 1000000, 2000000, 1500000, 800000];
+const GROUPS = ["KẾ TOÁN TAF", "KẾ TOÁN KHÁC", "NỘI BỘ", "TƯ VẤN"];
+
 export function getMockEmployeeClients(employeeId: number): EmployeeClient[] {
-  return Array.from({ length: 3 + (employeeId % 5) }, (_, i) => ({
+  const count = 3 + (employeeId % 10);
+  const emp = EMPLOYEES_RAW[(employeeId - 1) % EMPLOYEES_RAW.length];
+  const initial = emp.ho_ten.split(" ").pop()?.[0] || "?";
+  return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
-    ten: `CÔNG TY TNHH ${["ALPHA", "BETA", "GAMMA", "DELTA", "EPSILON"][i % 5]} ${employeeId}${i}`,
-    ma_so_thue: `030${1000000 + employeeId * 10 + i}`,
-    phi_dich_vu: [3000000, 5000000, 7000000, 2000000, 10000000][i % 5],
-    trang_thai: "Đang thực hiện",
+    ten: CLIENT_NAMES[i % CLIENT_NAMES.length],
+    ma_so_thue: TAX_CODES[i % TAX_CODES.length],
+    nhom_khach_hang: GROUPS[i % GROUPS.length],
+    gia_tri_hop_dong: CONTRACT_VALUES[i % CONTRACT_VALUES.length],
+    nhan_vien_ho_tro: initial,
+    nhan_vien_ho_tro_color: COLORS[(employeeId + i) % COLORS.length],
+    avatar_color: COLORS[(i * 3 + employeeId) % COLORS.length],
   }));
 }
 
