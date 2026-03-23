@@ -470,9 +470,7 @@ export function EmployeeDataTable({ employees, isLoading, totals, onDelete }: Pr
                     onClick={() => setExpandedId(expandedId === emp.id ? null : emp.id)}
                   >
                     <TableCell className="text-center px-2">
-                      {expandedId === emp.id
-                        ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                        : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                      <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${expandedId === emp.id ? "rotate-180" : ""}`} />
                     </TableCell>
                     <TableCell className="text-center text-xs tabular-nums">{(currentPage - 1) * pageSize + idx + 1}</TableCell>
                     <TableCell className="text-xs font-mono">{emp.ma}</TableCell>
