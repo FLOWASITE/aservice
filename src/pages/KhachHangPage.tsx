@@ -36,6 +36,7 @@ export default function KhachHangPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
   const [contractModalOpen, setContractModalOpen] = useState(false);
+  const [contractClientId, setContractClientId] = useState<number | undefined>();
 
   const handleEditClient = useCallback((client: Client) => {
     setEditClient(client);
