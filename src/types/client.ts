@@ -13,6 +13,9 @@ export interface Client {
   phi_dich_vu_toi_da: number;
   cong_no: number;
   hoa_don_di: number;
+  hoa_don_dien_tu: "da_ket_noi" | "chua_ket_noi" | "het_han";
+  thue_dien_tu: "da_nop" | "chua_nop" | "qua_han";
+  chu_ky_so: "con_han" | "het_han" | "chua_dang_ky";
   trang_thai: ClientStatus;
   avatar_color: string;
 }
