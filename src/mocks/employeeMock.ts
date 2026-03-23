@@ -74,8 +74,9 @@ export function removeEmployeeFromMock(id: number) {
 
 export function getMockEmployeeStats(): EmployeeStats {
   const allEmps = Object.values(employeesByStatus).flat();
+  const totalClients = allEmps.reduce((s, e) => s + e.so_luong_dv_ke_toan, 0);
   return {
-    khach_hang_phu_trach: allEmps.reduce((s, e) => s + e.so_luong_dv_ke_toan + e.so_luong_dv_khac, 0),
+    khach_hang_phu_trach: totalClients,
     cong_no: allEmps.reduce((s, e) => s + e.cong_no, 0),
     doanh_thu_dv_ke_toan: allEmps.reduce((s, e) => s + e.doanh_thu_dv_ke_toan, 0),
     doanh_thu_khac: allEmps.reduce((s, e) => s + e.doanh_thu_dv_khac, 0),
