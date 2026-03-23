@@ -163,9 +163,9 @@ export default function KhachHangPage() {
       </div>
 
       {/* Data table */}
-      <ClientDataTable clients={data?.data || []} isLoading={isLoading} />
+      <ClientDataTable clients={data?.data || []} isLoading={isLoading} onEditClient={handleEditClient} />
 
-      <AddClientModal open={addModalOpen} onOpenChange={setAddModalOpen} />
+      <AddClientModal open={addModalOpen} onOpenChange={handleModalClose} editClient={editClient} />
     </div>
   );
 }
