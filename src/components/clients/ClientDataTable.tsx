@@ -1,6 +1,10 @@
 import { useState, useMemo } from "react";
 import type { Client } from "@/types/client";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -9,7 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, Eye, Edit } from "lucide-react";
+import { CheckCircle, Eye, Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/usePagination";
 import { DataPagination } from "@/components/DataPagination";
@@ -18,12 +23,14 @@ interface Props {
   clients: Client[];
   isLoading?: boolean;
   onEditClient?: (client: Client) => void;
+  onDeleteClient?: (client: Client) => void;
 }
 
 const formatNumber = (v: number) =>
   v === 0 ? "0" : new Intl.NumberFormat("vi-VN").format(v);
 
-export function ClientDataTable({ clients, isLoading, onEditClient }: Props) {
+export function ClientDataTable({ clients, isLoading, onEditClient, onDeleteClient }: Props) {
+  const [deleteTarget, setDeleteTarget] = useState<Client | null>(null);
   const [colSearch, setColSearch] = useState({
     ten: "",
     nhom: "",
@@ -184,6 +191,9 @@ export function ClientDataTable({ clients, isLoading, onEditClient }: Props) {
                         <button className="p-1 rounded hover:bg-muted" title="Sửa" onClick={(e) => { e.stopPropagation(); onEditClient?.(client); }}>
                           <Edit className="h-4 w-4 text-muted-foreground" />
                         </button>
+                        <button className="p-1 rounded hover:bg-destructive/10" title="Xóa" onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -203,6 +213,32 @@ export function ClientDataTable({ clients, isLoading, onEditClient }: Props) {
         onPageChange={goToPage}
         onPageSizeChange={setPageSize}
       />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa khách hàng</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa khách hàng <strong>{deleteTarget?.ten}</strong>? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  onDeleteClient?.(deleteTarget);
+                  toast.success(`Đã xóa khách hàng "${deleteTarget.ten}"`);
+                }
+                setDeleteTarget(null);
+              }}
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
