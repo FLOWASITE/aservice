@@ -122,39 +122,47 @@ function ExpandedRow({ employeeId }: { employeeId: number }) {
     <TableRow>
       <TableCell colSpan={14} className="p-0">
         <div className="animate-accordion-down overflow-hidden">
-          <div className="mx-6 my-3 rounded-lg border bg-background/50">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b bg-muted/30">
-              <span className="text-xs font-bold text-foreground">Danh sách khách hàng phụ trách</span>
-              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ backgroundColor: "#FFEBEE", color: "#B71C1C" }}>
-                Tổng: {totalClients}
-              </span>
+          <div className="mx-6 my-3 rounded-lg border bg-background shadow-sm">
+            {/* Header with search */}
+            <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-primary/5 to-transparent">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-5 rounded-full bg-primary" />
+                <span className="text-sm font-bold text-foreground">Danh sách khách hàng phụ trách</span>
+                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-destructive/10 text-destructive">
+                  Tổng: {totalClients}
+                </span>
+              </div>
+              <div className="relative w-64">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Tìm kiếm khách hàng..."
+                  className="h-8 pl-8 text-xs border-muted bg-background"
+                  value={subSearch._global || ""}
+                  onChange={e => setSearch("_global", e.target.value)}
+                  onClick={e => e.stopPropagation()}
+                />
+              </div>
             </div>
 
             {/* Sub-table */}
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20">
+                <TableRow className="bg-muted/30">
                   <TableHead className="w-12 text-center text-[10px] font-semibold">STT</TableHead>
                   <TableHead className="min-w-[120px] text-[10px] font-semibold">
                     <div className="flex items-center gap-1">Mã số thuế <SubSortBtn sortKey="ma_so_thue" current={subSort} onSort={handleSubSort} /></div>
-                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.ma_so_thue || ""} onChange={e => setSearch("ma_so_thue", e.target.value)} onClick={e => e.stopPropagation()} />
                   </TableHead>
                   <TableHead className="min-w-[250px] text-[10px] font-semibold">
                     <div className="flex items-center gap-1">Tên khách hàng <SubSortBtn sortKey="ten" current={subSort} onSort={handleSubSort} /></div>
-                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.ten || ""} onChange={e => setSearch("ten", e.target.value)} onClick={e => e.stopPropagation()} />
                   </TableHead>
                   <TableHead className="min-w-[120px] text-[10px] font-semibold">
                     <div className="flex items-center gap-1">Nhóm KH <SubSortBtn sortKey="nhom_khach_hang" current={subSort} onSort={handleSubSort} /></div>
-                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.nhom_khach_hang || ""} onChange={e => setSearch("nhom_khach_hang", e.target.value)} onClick={e => e.stopPropagation()} />
                   </TableHead>
                   <TableHead className="min-w-[110px] text-[10px] font-semibold text-right">
                     <div className="flex items-center justify-end gap-1">Giá trị HĐ <SubSortBtn sortKey="gia_tri_hop_dong" current={subSort} onSort={handleSubSort} /></div>
-                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.gia_tri_hop_dong || ""} onChange={e => setSearch("gia_tri_hop_dong", e.target.value)} onClick={e => e.stopPropagation()} />
                   </TableHead>
                   <TableHead className="min-w-[100px] text-[10px] font-semibold">
                     <div className="flex items-center gap-1">NV hỗ trợ</div>
-                    <Input placeholder="Tìm kiếm" className="h-6 text-[10px] mt-1 border-muted" value={subSearch.nhan_vien_ho_tro || ""} onChange={e => setSearch("nhan_vien_ho_tro", e.target.value)} onClick={e => e.stopPropagation()} />
                   </TableHead>
                 </TableRow>
               </TableHeader>
