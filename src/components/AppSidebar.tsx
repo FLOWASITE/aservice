@@ -8,6 +8,7 @@ import {
   Wallet,
   LogOut,
 } from "lucide-react";
+import logoHorizontal from "@/assets/logo-horizontal.png";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/types/auth";
@@ -56,16 +57,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-sm shrink-0">
-            A
-          </div>
-          {!collapsed && (
-            <div>
-              <h1 className="text-sm font-semibold text-sidebar-accent-foreground">
-                AService
-              </h1>
-              <p className="text-xs text-sidebar-foreground">Quản lý dịch vụ kế toán</p>
+          {collapsed ? (
+            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-sm shrink-0">
+              A
             </div>
+          ) : (
+            <img src={logoHorizontal} alt="AService" className="h-8 object-contain" />
           )}
         </div>
       </SidebarHeader>
