@@ -3,8 +3,29 @@ import type { KeycloakTokenResponse, JwtPayload, AuthUser, AppRole } from "@/typ
 const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL || "http://localhost:8080/auth";
 const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM || "master";
 const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || "aservice";
+const USE_MOCK = !import.meta.env.VITE_KEYCLOAK_URL;
 
 const TOKEN_ENDPOINT = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
+
+// Mock accounts for development
+const MOCK_ACCOUNTS = [
+  { username: "duyvp@gmail.com", password: "123456", displayName: "Duy VP", roles: ["admin"] },
+  { username: "manager@gmail.com", password: "123456", displayName: "Manager", roles: ["manager"] },
+  { username: "nhanvien@gmail.com", password: "123456", displayName: "Nhân viên", roles: ["nhanvien"] },
+];
+
+function createMockJwt(account: typeof MOCK_ACCOUNTS[0]): string {
+  const header = btoa(JSON.stringify({ alg: "none", typ: "JWT" }));
+  const payload = btoa(JSON.stringify({
+    sub: crypto.randomUUID(),
+    preferred_username: account.displayName,
+    email: account.username,
+    realm_access: { roles: account.roles },
+    exp: Math.floor(Date.now() / 1000) + 3600,
+    iat: Math.floor(Date.now() / 1000),
+  }));
+  return `${header}.${payload}.mock-signature`;
+}
 
 function decodeJwt(token: string): JwtPayload {
   const base64Url = token.split(".")[1];
@@ -51,6 +72,21 @@ export function isTokenExpired(token: string): boolean {
 }
 
 export async function login(username: string, password: string): Promise<KeycloakTokenResponse> {
+  if (USE_MOCK) {
+    const account = MOCK_ACCOUNTS.find(
+      (a) => a.username === username && a.password === password
+    );
+    if (!account) throw new Error("Sai tên đăng nhập hoặc mật khẩu");
+    const token = createMockJwt(account);
+    return {
+      access_token: token,
+      refresh_token: "mock-refresh-token",
+      expires_in: 3600,
+      refresh_expires_in: 86400,
+      token_type: "Bearer",
+    };
+  }
+
   const body = new URLSearchParams({
     grant_type: "password",
     client_id: KEYCLOAK_CLIENT_ID,
@@ -73,6 +109,18 @@ export async function login(username: string, password: string): Promise<Keycloa
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<KeycloakTokenResponse> {
+  if (USE_MOCK) {
+    // In mock mode, just return a new token with the same first mock account
+    const token = createMockJwt(MOCK_ACCOUNTS[0]);
+    return {
+      access_token: token,
+      refresh_token: "mock-refresh-token",
+      expires_in: 3600,
+      refresh_expires_in: 86400,
+      token_type: "Bearer",
+    };
+  }
+
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     client_id: KEYCLOAK_CLIENT_ID,
