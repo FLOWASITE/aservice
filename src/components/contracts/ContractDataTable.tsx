@@ -12,7 +12,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Eye, Edit, Trash2, FileSignature, Check, AlertTriangle, XCircle, ArrowUpDown, ArrowUp, ArrowDown, X } from "lucide-react";
+import { Eye, Edit, Trash2, FileSignature, Check, AlertTriangle, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Search, X } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import { DataPagination } from "@/components/DataPagination";
 import { Button } from "@/components/ui/button";
@@ -98,44 +98,53 @@ const feeTypeLabels: Record<string, string> = {
 };
 
 export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
+  // Global search
+  const [globalSearch, setGlobalSearch] = useState("");
+  // Advanced filters (date range, value range, dropdowns)
   const [filters, setFilters] = useState({
-    clientName: "", contractNumber: "",
     startFrom: "", startTo: "", endFrom: "", endTo: "",
     valueMin: "", valueMax: "",
-    feeType: "", status: "", staffName: "", supportName: "", serviceName: "",
+    feeType: "", status: "",
   });
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Contract | null>(null);
 
   const setFilter = useCallback((key: string, value: string) => setFilters(prev => ({ ...prev, [key]: value })), []);
 
-  const hasActiveFilters = useMemo(() => Object.values(filters).some(v => v !== ""), [filters]);
+  const hasActiveFilters = useMemo(() =>
+    globalSearch !== "" || Object.values(filters).some(v => v !== ""),
+    [globalSearch, filters]
+  );
 
-  const clearFilters = useCallback(() => {
-    setFilters({
-      clientName: "", contractNumber: "",
-      startFrom: "", startTo: "", endFrom: "", endTo: "",
-      valueMin: "", valueMax: "",
-      feeType: "", status: "", staffName: "", supportName: "", serviceName: "",
-    });
+  const clearAll = useCallback(() => {
+    setGlobalSearch("");
+    setFilters({ startFrom: "", startTo: "", endFrom: "", endTo: "", valueMin: "", valueMax: "", feeType: "", status: "" });
   }, []);
 
   const handleSort = useCallback((key: SortKey) => {
     setSort(prev => {
       if (!prev || prev.key !== key) return { key, dir: "asc" };
       if (prev.dir === "asc") return { key, dir: "desc" };
-      return null; // third click removes sort
+      return null;
     });
   }, []);
 
   const processedData = useMemo(() => {
-    // 1. Filter
+    const q = globalSearch.toLowerCase().trim();
+
     let result = contracts.filter((c) => {
-      if (filters.clientName && !c.clientName.toLowerCase().includes(filters.clientName.toLowerCase())) return false;
-      if (filters.contractNumber && !c.contractNumber.toLowerCase().includes(filters.contractNumber.toLowerCase())) return false;
-      if (filters.staffName && !c.staffName.toLowerCase().includes(filters.staffName.toLowerCase())) return false;
-      if (filters.supportName && !c.supportStaff.some(s => s.name.toLowerCase().includes(filters.supportName.toLowerCase()))) return false;
-      if (filters.serviceName && !c.serviceName.toLowerCase().includes(filters.serviceName.toLowerCase())) return false;
+      // Global text search across multiple fields
+      if (q) {
+        const searchable = [
+          c.clientName, c.contractNumber, c.staffName, c.serviceName,
+          c.feeTypeLabel, statusLabels[c.status] || "",
+          ...c.supportStaff.map(s => s.name),
+        ].join(" ").toLowerCase();
+        if (!searchable.includes(q)) return false;
+      }
+
+      // Advanced filters
       if (filters.feeType && c.feeType !== filters.feeType) return false;
       if (filters.status && c.status !== filters.status) return false;
       if (filters.startFrom && c.startDate < filters.startFrom) return false;
@@ -147,7 +156,7 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
       return true;
     });
 
-    // 2. Sort
+    // Sort
     if (sort) {
       result = [...result].sort((a, b) => {
         let cmp = 0;
@@ -167,27 +176,114 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
     }
 
     return result;
-  }, [contracts, filters, sort]);
+  }, [contracts, globalSearch, filters, sort]);
 
   const { paginatedData, currentPage, pageSize, totalPages, totalItems, pageSizeOptions, goToPage, setPageSize } = usePagination(processedData);
 
   return (
     <>
-      {/* Active filter indicator */}
-      {hasActiveFilters && (
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Đang lọc: <strong className="text-foreground">{processedData.length}</strong> / {contracts.length} hợp đồng</span>
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={clearFilters}>
-            <X className="h-3 w-3 mr-1" /> Xóa bộ lọc
-          </Button>
+      {/* Search bar + advanced filter toggle */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm theo khách hàng, số HĐ, NV, dịch vụ..."
+            className="pl-9 h-9"
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
+          />
+          {globalSearch && (
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted" onClick={() => setGlobalSearch("")}>
+              <X className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+
+        <Button
+          variant={showAdvanced ? "secondary" : "outline"}
+          size="sm"
+          className="h-9 text-xs shrink-0"
+          onClick={() => setShowAdvanced(prev => !prev)}
+        >
+          Bộ lọc nâng cao
+          {Object.values(filters).some(v => v !== "") && (
+            <span className="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              {Object.values(filters).filter(v => v !== "").length}
+            </span>
+          )}
+        </Button>
+
+        {hasActiveFilters && (
+          <div className="flex items-center gap-2 text-sm ml-auto">
+            <span className="text-muted-foreground">
+              Kết quả: <strong className="text-foreground">{processedData.length}</strong> / {contracts.length}
+            </span>
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={clearAll}>
+              <X className="h-3 w-3 mr-1" /> Xóa lọc
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Advanced filters panel */}
+      {showAdvanced && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-lg border bg-muted/30">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Ngày bắt đầu từ</label>
+            <Input type="date" className="h-8 text-xs" value={filters.startFrom} onChange={e => setFilter("startFrom", e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Ngày bắt đầu đến</label>
+            <Input type="date" className="h-8 text-xs" value={filters.startTo} onChange={e => setFilter("startTo", e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Ngày kết thúc từ</label>
+            <Input type="date" className="h-8 text-xs" value={filters.endFrom} onChange={e => setFilter("endFrom", e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Ngày kết thúc đến</label>
+            <Input type="date" className="h-8 text-xs" value={filters.endTo} onChange={e => setFilter("endTo", e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Giá trị tối thiểu</label>
+            <Input type="number" placeholder="0" className="h-8 text-xs" value={filters.valueMin} onChange={e => setFilter("valueMin", e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Giá trị tối đa</label>
+            <Input type="number" placeholder="∞" className="h-8 text-xs" value={filters.valueMax} onChange={e => setFilter("valueMax", e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Cách tính phí</label>
+            <Select value={filters.feeType || "all"} onValueChange={v => setFilter("feeType", v === "all" ? "" : v)}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tất cả" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                {Object.entries(feeTypeLabels).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Trạng thái</label>
+            <Select value={filters.status || "all"} onValueChange={v => setFilter("status", v === "all" ? "" : v)}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tất cả" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                {Object.entries(statusLabels).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 
+      {/* Table */}
       <div className="border rounded-lg overflow-hidden bg-card">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              {/* Header row with sort */}
               <TableRow className="bg-muted/50">
                 <TableHead className="w-12 text-center">STT</TableHead>
                 <TableHead className="min-w-[200px]">
@@ -196,13 +292,13 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
                 <TableHead className="min-w-[150px]">
                   <div className="flex items-center">Số hợp đồng <SortButton sortKey="contractNumber" currentSort={sort} onSort={handleSort} /></div>
                 </TableHead>
-                <TableHead className="min-w-[180px]">
+                <TableHead className="min-w-[110px]">
                   <div className="flex items-center">Ngày bắt đầu <SortButton sortKey="startDate" currentSort={sort} onSort={handleSort} /></div>
                 </TableHead>
-                <TableHead className="min-w-[180px]">
+                <TableHead className="min-w-[110px]">
                   <div className="flex items-center">Ngày kết thúc <SortButton sortKey="endDate" currentSort={sort} onSort={handleSort} /></div>
                 </TableHead>
-                <TableHead className="min-w-[180px]">
+                <TableHead className="min-w-[130px]">
                   <div className="flex items-center justify-end">Giá trị <SortButton sortKey="contractValue" currentSort={sort} onSort={handleSort} /></div>
                 </TableHead>
                 <TableHead className="min-w-[100px]">
@@ -220,56 +316,6 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
                 </TableHead>
                 <TableHead className="w-24 text-center sticky right-0 bg-muted/50 z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]">Thao tác</TableHead>
               </TableRow>
-              {/* Filter row */}
-              <TableRow className="bg-muted/20">
-                <TableHead />
-                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.clientName} onChange={e => setFilter("clientName", e.target.value)} /></TableHead>
-                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.contractNumber} onChange={e => setFilter("contractNumber", e.target.value)} /></TableHead>
-                <TableHead>
-                  <div className="flex gap-1">
-                    <Input type="date" className="h-7 text-xs flex-1" title="Từ ngày" value={filters.startFrom} onChange={e => setFilter("startFrom", e.target.value)} />
-                    <Input type="date" className="h-7 text-xs flex-1" title="Đến ngày" value={filters.startTo} onChange={e => setFilter("startTo", e.target.value)} />
-                  </div>
-                </TableHead>
-                <TableHead>
-                  <div className="flex gap-1">
-                    <Input type="date" className="h-7 text-xs flex-1" title="Từ ngày" value={filters.endFrom} onChange={e => setFilter("endFrom", e.target.value)} />
-                    <Input type="date" className="h-7 text-xs flex-1" title="Đến ngày" value={filters.endTo} onChange={e => setFilter("endTo", e.target.value)} />
-                  </div>
-                </TableHead>
-                <TableHead>
-                  <div className="flex gap-1">
-                    <Input type="number" placeholder="Min" className="h-7 text-xs flex-1" value={filters.valueMin} onChange={e => setFilter("valueMin", e.target.value)} />
-                    <Input type="number" placeholder="Max" className="h-7 text-xs flex-1" value={filters.valueMax} onChange={e => setFilter("valueMax", e.target.value)} />
-                  </div>
-                </TableHead>
-                <TableHead>
-                  <Select value={filters.feeType || "all"} onValueChange={v => setFilter("feeType", v === "all" ? "" : v)}>
-                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Tất cả" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả</SelectItem>
-                      {Object.entries(feeTypeLabels).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>{v}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableHead>
-                <TableHead>
-                  <Select value={filters.status || "all"} onValueChange={v => setFilter("status", v === "all" ? "" : v)}>
-                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Tất cả" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả</SelectItem>
-                      {Object.entries(statusLabels).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>{v}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableHead>
-                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.staffName} onChange={e => setFilter("staffName", e.target.value)} /></TableHead>
-                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.supportName} onChange={e => setFilter("supportName", e.target.value)} /></TableHead>
-                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.serviceName} onChange={e => setFilter("serviceName", e.target.value)} /></TableHead>
-                <TableHead className="sticky right-0 bg-muted/20 z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]" />
-              </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
@@ -284,7 +330,10 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
                 <TableRow>
                   <TableCell colSpan={12} className="text-center py-12 text-muted-foreground">
                     <FileSignature className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                    <p>Không tìm thấy hợp đồng nào</p>
+                    <p>{hasActiveFilters ? "Không tìm thấy hợp đồng phù hợp" : "Chưa có hợp đồng nào"}</p>
+                    {hasActiveFilters && (
+                      <Button variant="link" size="sm" className="mt-1 text-xs" onClick={clearAll}>Xóa bộ lọc</Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (
