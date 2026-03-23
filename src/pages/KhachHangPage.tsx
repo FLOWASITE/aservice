@@ -3,6 +3,7 @@ import { useClients } from "@/hooks/useClients";
 import { ClientStatCards } from "@/components/clients/ClientStatCards";
 import { ClientDataTable } from "@/components/clients/ClientDataTable";
 import { AddClientModal } from "@/components/clients/AddClientModal";
+import { CreateContractModal } from "@/components/contracts/CreateContractModal";
 import type { ClientStatus, Client } from "@/types/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ export default function KhachHangPage() {
   const [year, setYear] = useState(currentYear);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
+  const [contractModalOpen, setContractModalOpen] = useState(false);
 
   const handleEditClient = useCallback((client: Client) => {
     setEditClient(client);
@@ -163,9 +165,17 @@ export default function KhachHangPage() {
       </div>
 
       {/* Data table */}
-      <ClientDataTable clients={data?.data || []} isLoading={isLoading} onEditClient={handleEditClient} onDeleteClient={(client) => console.log("Delete client", client.id)} />
+      <ClientDataTable
+        clients={data?.data || []}
+        isLoading={isLoading}
+        showCreateContract={activeTab === "cho_thuc_hien"}
+        onEditClient={handleEditClient}
+        onDeleteClient={(client) => console.log("Delete client", client.id)}
+        onCreateContract={() => setContractModalOpen(true)}
+      />
 
       <AddClientModal open={addModalOpen} onOpenChange={handleModalClose} editClient={editClient} />
+      <CreateContractModal open={contractModalOpen} onOpenChange={setContractModalOpen} />
     </div>
   );
 }
