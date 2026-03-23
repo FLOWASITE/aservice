@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useClients } from "@/hooks/useClients";
 import { ClientStatCards } from "@/components/clients/ClientStatCards";
 import { ClientDataTable } from "@/components/clients/ClientDataTable";
+import { AddClientModal } from "@/components/clients/AddClientModal";
 import type { ClientStatus } from "@/types/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export default function KhachHangPage() {
   const [search, setSearch] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(currentYear);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const { data, isLoading } = useClients({
     status: activeTab,
@@ -135,7 +137,7 @@ export default function KhachHangPage() {
         </form>
 
         <div className="ml-auto flex gap-2">
-          <Button variant="outline" size="sm" className="h-9">
+          <Button variant="outline" size="sm" className="h-9" onClick={() => setAddModalOpen(true)}>
             <Plus className="h-4 w-4 mr-1" />
             Thêm khách hàng
           </Button>
@@ -151,6 +153,8 @@ export default function KhachHangPage() {
 
       {/* Data table */}
       <ClientDataTable clients={data?.data || []} isLoading={isLoading} />
+
+      <AddClientModal open={addModalOpen} onOpenChange={setAddModalOpen} />
     </div>
   );
 }
