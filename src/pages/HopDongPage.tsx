@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, Eye, Edit, FileSignature } from "lucide-react";
+import { usePagination } from "@/hooks/usePagination";
+import { DataPagination } from "@/components/DataPagination";
 import type { ContractStatus } from "@/types/contract";
 
 const statusLabels: Record<ContractStatus, string> = {
@@ -55,6 +57,17 @@ export default function HopDongPage() {
           c.khach_hang_ten.toLowerCase().includes(search.toLowerCase())
       )
     : contracts;
+
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    pageSizeOptions,
+    goToPage,
+    setPageSize,
+  } = usePagination(filtered);
 
   return (
     <div className="space-y-4">
@@ -140,7 +153,7 @@ export default function HopDongPage() {
                     ))}
                   </TableRow>
                 ))
-              ) : filtered.length === 0 ? (
+              ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
                     <FileSignature className="h-10 w-10 mx-auto mb-2 opacity-30" />
@@ -148,9 +161,11 @@ export default function HopDongPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((contract, idx) => (
+                paginatedData.map((contract, idx) => (
                   <TableRow key={contract.id} className="hover:bg-muted/30">
-                    <TableCell className="text-center text-sm">{idx + 1}</TableCell>
+                    <TableCell className="text-center text-sm">
+                      {(currentPage - 1) * pageSize + idx + 1}
+                    </TableCell>
                     <TableCell className="text-sm font-medium text-primary">{contract.so_hop_dong}</TableCell>
                     <TableCell className="text-sm truncate max-w-[220px]">{contract.khach_hang_ten}</TableCell>
                     <TableCell className="text-sm">{contract.dich_vu_ten}</TableCell>
@@ -183,6 +198,17 @@ export default function HopDongPage() {
           </Table>
         </div>
       </div>
+
+      {/* Pagination */}
+      <DataPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        pageSizeOptions={pageSizeOptions}
+        onPageChange={goToPage}
+        onPageSizeChange={setPageSize}
+      />
 
       {/* Create Modal */}
       <CreateContractModal open={modalOpen} onOpenChange={setModalOpen} />
