@@ -1,4 +1,5 @@
 import type { Employee, EmployeeStats, EmployeeTabCount, EmployeeClient, EmployeeStatus, EmployeeTotals, Group } from "@/types/employee";
+import { mockContracts } from "@/mocks/contractMock";
 
 const COLORS = [
   "hsl(215 70% 42%)", "hsl(152 60% 42%)", "hsl(0 72% 51%)",
