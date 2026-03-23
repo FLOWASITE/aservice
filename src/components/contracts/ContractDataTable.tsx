@@ -184,19 +184,21 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
     <>
       {/* Search bar + advanced filter toggle */}
       <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm theo khách hàng, số HĐ, NV, dịch vụ..."
-            className="pl-9 h-9"
-            value={globalSearch}
-            onChange={(e) => setGlobalSearch(e.target.value)}
-          />
+        <div className="premium-search flex-1 max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm theo khách hàng, số HĐ, NV, dịch vụ..."
+              className="pl-9 h-9 border-0 shadow-none focus-visible:ring-0"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+            />
           {globalSearch && (
             <button className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted" onClick={() => setGlobalSearch("")}>
               <X className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           )}
+          </div>
         </div>
 
         <Button
@@ -227,7 +229,7 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
 
       {/* Advanced filters panel */}
       {showAdvanced && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-lg border bg-muted/30">
+        <div className="glass-panel grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Ngày bắt đầu từ</label>
             <Input type="date" className="h-8 text-xs" value={filters.startFrom} onChange={e => setFilter("startFrom", e.target.value)} />
@@ -280,7 +282,7 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden bg-card">
+      <div className="premium-table-wrapper">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

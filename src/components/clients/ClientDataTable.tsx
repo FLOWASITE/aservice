@@ -136,14 +136,16 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
     <div className="space-y-3">
       {/* Search & Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm tên, nhóm, nhân viên..."
-            className="pl-9 h-9"
-            value={globalSearch}
-            onChange={(e) => setGlobalSearch(e.target.value)}
-          />
+        <div className="premium-search flex-1 min-w-[200px] max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm kiếm tên, nhóm, nhân viên..."
+              className="pl-9 h-9 border-0 shadow-none focus-visible:ring-0"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+            />
+          </div>
         </div>
 
         <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
@@ -175,7 +177,7 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
       {/* Advanced Filters Panel */}
       <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
         <CollapsibleContent>
-          <div className="border rounded-lg p-4 bg-muted/30 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-panel p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Phí tối thiểu (Min - Max)</label>
               <div className="flex gap-2">
@@ -202,7 +204,7 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
       </Collapsible>
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden bg-card">
+      <div className="premium-table-wrapper">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
