@@ -35,6 +35,34 @@ const employeesByStatus: Record<string, Employee[]> = {
   khac: [],
 };
 
+export function addEmployeeToMock(payload: any): Employee {
+  const status = payload.trang_thai || "dang_lam_viec";
+  const list = employeesByStatus[status] || (employeesByStatus[status] = []);
+  const allEmployees = Object.values(employeesByStatus).flat();
+  const newId = allEmployees.length > 0 ? Math.max(...allEmployees.map(e => e.id)) + 1 : 1;
+  const newEmployee: Employee = {
+    id: newId,
+    stt: list.length + 1,
+    ma: payload.ma,
+    ho_ten: payload.ho_ten,
+    email: payload.email || "",
+    chuc_vu: payload.chuc_vu || "",
+    nhom: "—",
+    nhom_id: payload.nhom_id || 0,
+    ngay_bat_dau: payload.ngay_bat_dau || new Date().toISOString().slice(0, 10),
+    tham_nien: { years: 0, months: 0 },
+    so_luong_dv_ke_toan: 0,
+    so_luong_dv_khac: 0,
+    doanh_thu_dv_ke_toan: 0,
+    doanh_thu_dv_khac: 0,
+    cong_no: 0,
+    avatar_color: COLORS[newId % COLORS.length],
+    trang_thai: status,
+  };
+  list.push(newEmployee);
+  return newEmployee;
+}
+
 export function removeEmployeeFromMock(id: number) {
   for (const key of Object.keys(employeesByStatus)) {
     const idx = employeesByStatus[key].findIndex((e) => e.id === id);
