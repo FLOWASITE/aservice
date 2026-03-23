@@ -6,11 +6,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { X, Building2, Calculator, Link2, AppWindow } from "lucide-react";
+import { X, Building2, Calculator, Link2 } from "lucide-react";
 import { BasicInfoSection } from "./sections/BasicInfoSection";
 import { AccountingInfoSection } from "./sections/AccountingInfoSection";
 import { RelatedInfoSection } from "./sections/RelatedInfoSection";
-import { ApplicationSection } from "./sections/ApplicationSection";
+
 import { useCreateClient } from "@/hooks/useClientForm";
 import { toast } from "sonner";
 import type { ClientCreatePayload } from "@/types/clientForm";
@@ -29,8 +29,6 @@ function getDefaultForm(): Record<string, any> {
     socialInsurance: { unitCode: "", username: "", password: "" },
     eInvoicePortal: { provider: "", username: "", password: "" },
     invoiceReceivingEmails: [], invoiceSendingEmails: [],
-    software: "aketoan", applications: [], otherSoftwareName: "",
-    description: { general: "", businessType: "", mainProducts: "", mainExpenses: "" },
   };
 }
 
@@ -190,17 +188,6 @@ export function AddClientModal({ open, onOpenChange, editClient }: Props) {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="application" className="border rounded-lg px-4">
-                <AccordionTrigger className="hover:no-underline py-3">
-                  <span className="flex items-center gap-2 text-sm font-semibold">
-                    <AppWindow className="h-4 w-4 text-primary" />
-                    Ứng dụng & Mô tả
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pb-4">
-                  <ApplicationSection form={form} setField={setField} />
-                </AccordionContent>
-              </AccordionItem>
             </Accordion>
           </div>
 
