@@ -41,6 +41,7 @@ import type { ContractCreatePayload, SoftwareType, SalaryConfig, FeeCalculation,
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultClientId?: number;
 }
 
 const initialForm: ContractCreatePayload = {
@@ -64,8 +65,8 @@ const initialForm: ContractCreatePayload = {
 
 const formatCurrency = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 
-export function CreateContractModal({ open, onOpenChange }: Props) {
-  const [form, setForm] = useState<ContractCreatePayload>({ ...initialForm });
+export function CreateContractModal({ open, onOpenChange, defaultClientId }: Props) {
+  const [form, setForm] = useState<ContractCreatePayload>({ ...initialForm, khach_hang_id: defaultClientId || 0 });
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [fileName, setFileName] = useState<string | null>(null);
