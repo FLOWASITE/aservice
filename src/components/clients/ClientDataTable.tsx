@@ -30,6 +30,34 @@ interface Props {
 const formatNumber = (v: number) =>
   v === 0 ? "0" : new Intl.NumberFormat("vi-VN").format(v);
 
+const STATUS_CONFIG = {
+  hddt: {
+    da_ket_noi: { label: "Đã kết nối", cls: "bg-emerald-100 text-emerald-700" },
+    chua_ket_noi: { label: "Chưa kết nối", cls: "bg-amber-100 text-amber-700" },
+    het_han: { label: "Hết hạn", cls: "bg-red-100 text-red-700" },
+  },
+  thue: {
+    da_nop: { label: "Đã nộp", cls: "bg-emerald-100 text-emerald-700" },
+    chua_nop: { label: "Chưa nộp", cls: "bg-amber-100 text-amber-700" },
+    qua_han: { label: "Quá hạn", cls: "bg-red-100 text-red-700" },
+  },
+  cks: {
+    con_han: { label: "Còn hạn", cls: "bg-emerald-100 text-emerald-700" },
+    het_han: { label: "Hết hạn", cls: "bg-red-100 text-red-700" },
+    chua_dang_ky: { label: "Chưa ĐK", cls: "bg-muted text-muted-foreground" },
+  },
+} as const;
+
+function StatusBadge({ type, value }: { type: keyof typeof STATUS_CONFIG; value: string }) {
+  const config = (STATUS_CONFIG[type] as Record<string, { label: string; cls: string }>)[value];
+  if (!config) return <span className="text-xs text-muted-foreground">—</span>;
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${config.cls}`}>
+      {config.label}
+    </span>
+  );
+}
+
 type SortKey = "ten" | "nhom" | "nhan_vien_phu_trach" | "phi_dich_vu_toi_thieu" | "phi_dich_vu_toi_da" | "cong_no" | "hoa_don_di";
 type SortDir = "asc" | "desc";
 
