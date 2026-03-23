@@ -176,7 +176,7 @@ export default function KhachHangPage() {
       />
 
       <AddClientModal open={addModalOpen} onOpenChange={handleModalClose} editClient={editClient} />
-      <CreateContractModal open={contractModalOpen} onOpenChange={setContractModalOpen} />
+      <CreateContractModal open={contractModalOpen} onOpenChange={setContractModalOpen} defaultClientId={contractClientId} />
     </div>
   );
 }
