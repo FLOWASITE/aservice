@@ -78,41 +78,61 @@ export function getMockEmployeeTotals(): EmployeeTotals {
   };
 }
 
-const CLIENT_NAMES = [
-  "CÔNG TY TNHH ĐƯỜNG SINH MỸ CÁT",
-  "CÔNG TY TNHH ĐẦU TƯ & THƯƠNG MẠI HƯNG VẠN PHÁT",
-  "CÔNG TY TNHH FVTOURIST",
-  "CÔNG TY TNHH CONNECTX TECHNOLOGY",
-  "CÔNG TY TNHH XÂY DỰNG VÀ DỊCH VỤ NGỌC XUÂN",
-  "CÔNG TY TNHH JOY LIFE",
-  "CÔNG TY TNHH XUẤT NHẬP KHẨU UYÊN THƯ",
-  "TRƯỜNG MẦM NON HỌC VIỆN SÀI GÒN",
-  "CÔNG TY TNHH LUCKY VN STAR",
-  "CÔNG TY TNHH TM DV HOÀNG PHÚC GIA",
-  "CÔNG TY TNHH SẢN XUẤT BAO BÌ TÂN PHÁT",
-  "CÔNG TY TNHH THƯƠNG MẠI MINH ĐẠT",
-];
-const TAX_CODES = [
-  "0317505793", "0316365906", "0311961221", "0318056822",
-  "4101580900", "0316079493", "0317892165", "0314160068",
-  "0317881445", "0315234567", "0319876543", "0312345678",
-];
-const CONTRACT_VALUES = [500000, 3300000, 1000000, 500000, 1000000, 3000000, 700000, 6000000, 1000000, 2000000, 1500000, 800000];
-const GROUPS = ["KẾ TOÁN TAF", "KẾ TOÁN KHÁC", "NỘI BỘ", "TƯ VẤN"];
+// Mapping from employee numeric ID to contract staffId
+const employeeToStaffId: Record<number, string> = {
+  1: "emp_001", // Lê Ngọc Thuỷ
+  2: "emp_007", // Nguyễn Thành An
+  3: "emp_006", // Nguyễn Thị Kim Oanh
+  4: "emp_004", // Phạm Thị Mỹ Duyên
+  5: "emp_005", // Phạm Thị Thu Thảo (was emp_001 in old contract mock)
+  6: "emp_002", // Trần Thị Thanh Hằng
+  7: "emp_008", // Phạm Văn Phúc
+  8: "emp_009", // Trần Nguyễn Yến Nhi
+  9: "emp_003", // Nguyễn Thị Diệu Hương
+};
 
 export function getMockEmployeeClients(employeeId: number): EmployeeClient[] {
-  const count = 3 + (employeeId % 10);
-  const emp = EMPLOYEES_RAW[(employeeId - 1) % EMPLOYEES_RAW.length];
-  const initial = emp.ho_ten.split(" ").pop()?.[0] || "?";
-  return Array.from({ length: count }, (_, i) => ({
+  const { clientTaxCodes, clientGroups } = require("@/mocks/contractMock");
+  const staffId = employeeToStaffId[employeeId];
+  if (!staffId) return [];
+
+  // Group contracts by clientId for this employee
+  const clientMap: Record<string, {
+    clientName: string;
+    clientInitial: string;
+    clientInitialColor: string;
+    totalValue: number;
+    supportStaff: { initial: string; color: string }[];
+  }> = {};
+
+  mockContracts.forEach(c => {
+    if (c.staffId !== staffId) return;
+    if (!clientMap[c.clientId]) {
+      clientMap[c.clientId] = {
+        clientName: c.clientName,
+        clientInitial: c.clientInitial,
+        clientInitialColor: c.clientInitialColor,
+        totalValue: 0,
+        supportStaff: [],
+      };
+    }
+    clientMap[c.clientId].totalValue += c.contractValue;
+    c.supportStaff.forEach(s => {
+      if (!clientMap[c.clientId].supportStaff.find(ss => ss.initial === s.initial)) {
+        clientMap[c.clientId].supportStaff.push({ initial: s.initial, color: s.color });
+      }
+    });
+  });
+
+  return Object.entries(clientMap).map(([clientId, info], i) => ({
     id: i + 1,
-    ten: CLIENT_NAMES[i % CLIENT_NAMES.length],
-    ma_so_thue: TAX_CODES[i % TAX_CODES.length],
-    nhom_khach_hang: GROUPS[i % GROUPS.length],
-    gia_tri_hop_dong: CONTRACT_VALUES[i % CONTRACT_VALUES.length],
-    nhan_vien_ho_tro: initial,
-    nhan_vien_ho_tro_color: COLORS[(employeeId + i) % COLORS.length],
-    avatar_color: COLORS[(i * 3 + employeeId) % COLORS.length],
+    ten: info.clientName,
+    ma_so_thue: clientTaxCodes[clientId] || "0000000000",
+    nhom_khach_hang: clientGroups[clientId] || "—",
+    gia_tri_hop_dong: info.totalValue,
+    nhan_vien_ho_tro: info.supportStaff[0]?.initial || "—",
+    nhan_vien_ho_tro_color: info.supportStaff[0]?.color || COLORS[0],
+    avatar_color: info.clientInitialColor,
   }));
 }
 
