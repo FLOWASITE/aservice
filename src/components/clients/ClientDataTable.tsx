@@ -14,7 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2, PlusCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/usePagination";
@@ -23,14 +24,16 @@ import { DataPagination } from "@/components/DataPagination";
 interface Props {
   clients: Client[];
   isLoading?: boolean;
+  showCreateContract?: boolean;
   onEditClient?: (client: Client) => void;
   onDeleteClient?: (client: Client) => void;
+  onCreateContract?: (client: Client) => void;
 }
 
 const formatNumber = (v: number) =>
   v === 0 ? "0" : new Intl.NumberFormat("vi-VN").format(v);
 
-export function ClientDataTable({ clients, isLoading, onEditClient, onDeleteClient }: Props) {
+export function ClientDataTable({ clients, isLoading, showCreateContract, onEditClient, onDeleteClient, onCreateContract }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<Client | null>(null);
   const [colSearch, setColSearch] = useState({
     ten: "",
@@ -184,6 +187,16 @@ export function ClientDataTable({ clients, isLoading, onEditClient, onDeleteClie
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-1">
+                        {showCreateContract && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button className="p-1 rounded hover:bg-primary/10" title="Tạo hợp đồng dịch vụ" onClick={(e) => { e.stopPropagation(); onCreateContract?.(client); }}>
+                                <PlusCircle className="h-4 w-4 text-primary" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>Tạo hợp đồng dịch vụ</TooltipContent>
+                          </Tooltip>
+                        )}
                         <button className="p-1 rounded hover:bg-muted" title="Xem">
                           <Eye className="h-4 w-4 text-muted-foreground" />
                         </button>
