@@ -8,7 +8,7 @@ import { EmployeeStatCards } from "@/components/employees/EmployeeStatCards";
 import { EmployeeDataTable } from "@/components/employees/EmployeeDataTable";
 import { AddEmployeeModal } from "@/components/employees/AddEmployeeModal";
 import { GroupsTab } from "@/components/employees/GroupsTab";
-import { useEmployeeStats, useEmployeeTabCounts, useEmployees, useDeleteEmployee } from "@/hooks/useEmployees";
+import { useEmployeeStats, useEmployeeTabCounts, useEmployees, useDeleteEmployee, useEmployeeTotals } from "@/hooks/useEmployees";
 import type { EmployeeStatus } from "@/types/employee";
 import { toast } from "sonner";
 
@@ -34,6 +34,7 @@ export default function NhanSuPage() {
   const { data: stats } = useEmployeeStats();
   const { data: tabCounts } = useEmployeeTabCounts();
   const { data: employees, isLoading } = useEmployees(statusTab, search || undefined);
+  const { data: totals } = useEmployeeTotals();
   const deleteMutation = useDeleteEmployee();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -154,7 +155,7 @@ export default function NhanSuPage() {
           </div>
 
           {/* Data table */}
-          <EmployeeDataTable employees={employees || []} isLoading={isLoading} onDelete={handleDelete} />
+          <EmployeeDataTable employees={employees || []} isLoading={isLoading} totals={totals} onDelete={handleDelete} />
 
           <AddEmployeeModal open={addModalOpen} onOpenChange={setAddModalOpen} />
         </TabsContent>
