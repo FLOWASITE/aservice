@@ -92,7 +92,6 @@ const employeeToStaffId: Record<number, string> = {
 };
 
 export function getMockEmployeeClients(employeeId: number): EmployeeClient[] {
-  const { clientTaxCodes, clientGroups } = require("@/mocks/contractMock");
   const staffId = employeeToStaffId[employeeId];
   if (!staffId) return [];
 
