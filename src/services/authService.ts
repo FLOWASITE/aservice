@@ -72,6 +72,21 @@ export function isTokenExpired(token: string): boolean {
 }
 
 export async function login(username: string, password: string): Promise<KeycloakTokenResponse> {
+  if (USE_MOCK) {
+    const account = MOCK_ACCOUNTS.find(
+      (a) => a.username === username && a.password === password
+    );
+    if (!account) throw new Error("Sai tên đăng nhập hoặc mật khẩu");
+    const token = createMockJwt(account);
+    return {
+      access_token: token,
+      refresh_token: "mock-refresh-token",
+      expires_in: 3600,
+      refresh_expires_in: 86400,
+      token_type: "Bearer",
+    };
+  }
+
   const body = new URLSearchParams({
     grant_type: "password",
     client_id: KEYCLOAK_CLIENT_ID,
@@ -94,6 +109,18 @@ export async function login(username: string, password: string): Promise<Keycloa
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<KeycloakTokenResponse> {
+  if (USE_MOCK) {
+    // In mock mode, just return a new token with the same first mock account
+    const token = createMockJwt(MOCK_ACCOUNTS[0]);
+    return {
+      access_token: token,
+      refresh_token: "mock-refresh-token",
+      expires_in: 3600,
+      refresh_expires_in: 86400,
+      token_type: "Bearer",
+    };
+  }
+
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     client_id: KEYCLOAK_CLIENT_ID,
