@@ -73,20 +73,21 @@ export function removeEmployeeFromMock(id: number) {
 }
 
 export function getMockEmployeeStats(): EmployeeStats {
+  const allEmps = Object.values(employeesByStatus).flat();
   return {
-    khach_hang_phu_trach: 133,
-    cong_no: 0,
-    doanh_thu_dv_ke_toan: 838242311,
-    doanh_thu_khac: 45600000,
-    tong_doanh_thu_nam: 9748898309,
+    khach_hang_phu_trach: allEmps.reduce((s, e) => s + e.so_luong_dv_ke_toan + e.so_luong_dv_khac, 0),
+    cong_no: allEmps.reduce((s, e) => s + e.cong_no, 0),
+    doanh_thu_dv_ke_toan: allEmps.reduce((s, e) => s + e.doanh_thu_dv_ke_toan, 0),
+    doanh_thu_khac: allEmps.reduce((s, e) => s + e.doanh_thu_dv_khac, 0),
+    tong_doanh_thu_nam: allEmps.reduce((s, e) => s + e.doanh_thu_dv_ke_toan + e.doanh_thu_dv_khac, 0),
   };
 }
 
 export function getMockEmployeeTabCounts(): EmployeeTabCount {
   return {
-    dang_lam_viec: 9,
-    nghi_thai_san: 2,
-    khac: 21,
+    dang_lam_viec: (employeesByStatus["dang_lam_viec"] || []).length,
+    nghi_thai_san: (employeesByStatus["nghi_thai_san"] || []).length,
+    khac: (employeesByStatus["khac"] || []).length,
   };
 }
 
@@ -105,13 +106,14 @@ export function getMockEmployees(status: EmployeeStatus, search?: string): Emplo
 }
 
 export function getMockEmployeeTotals(): EmployeeTotals {
+  const list = employeesByStatus["dang_lam_viec"] || [];
   return {
-    total_clients: 119,
-    total_so_luong_dv_ke_toan: 119,
-    total_so_luong_dv_khac: 0,
-    total_doanh_thu_dv_ke_toan: 493666110,
-    total_doanh_thu_dv_khac: 0,
-    total_cong_no: 0,
+    total_clients: list.reduce((s, e) => s + e.so_luong_dv_ke_toan + e.so_luong_dv_khac, 0),
+    total_so_luong_dv_ke_toan: list.reduce((s, e) => s + e.so_luong_dv_ke_toan, 0),
+    total_so_luong_dv_khac: list.reduce((s, e) => s + e.so_luong_dv_khac, 0),
+    total_doanh_thu_dv_ke_toan: list.reduce((s, e) => s + e.doanh_thu_dv_ke_toan, 0),
+    total_doanh_thu_dv_khac: list.reduce((s, e) => s + e.doanh_thu_dv_khac, 0),
+    total_cong_no: list.reduce((s, e) => s + e.cong_no, 0),
   };
 }
 
