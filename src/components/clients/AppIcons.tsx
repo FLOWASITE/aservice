@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_LIST } from "@/types/application";
 import logoAketoan from "@/assets/logo-aketoan.png";
@@ -18,7 +17,6 @@ interface Props {
 }
 
 export function AppIcons({ clientId, apps, otherSoftware }: Props) {
-  const navigate = useNavigate();
 
   if ((!apps || apps.length === 0) && !otherSoftware) {
     return <span className="text-muted-foreground">—</span>;
@@ -54,7 +52,7 @@ export function AppIcons({ clientId, apps, otherSoftware }: Props) {
                 className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden bg-white border border-border/50 transition-transform hover:scale-110 hover:shadow-md"
               >
                 <img src={APP_LOGOS[code]} alt={app.name} className="w-6 h-6 object-contain" />
-              </button>
+              </a>
             </TooltipTrigger>
             <TooltipContent>Mở {app.name}</TooltipContent>
           </Tooltip>
