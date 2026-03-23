@@ -9,11 +9,7 @@ import logoAketoan from "@/assets/logo-aketoan.png";
 import logoAmall from "@/assets/logo-amall.png";
 import logoAread from "@/assets/logo-aread.png";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,68 +17,50 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import {
-  useDropdownClients,
-  useDropdownServices,
-  useDropdownEmployees,
-  useDropdownApplications,
+  useDropdownClients, useDropdownServices, useDropdownEmployees,
   useCreateContract,
 } from "@/hooks/useContracts";
-import type { ContractCreatePayload, SoftwareType, SalaryConfig, FeeCalculation, ContractStatus } from "@/types/contract";
+import type { ContractCreatePayload, FeeType, SoftwareType, SalaryConfig, ContractStatus } from "@/types/contract";
+
+const APP_LOGOS: Record<string, string> = { aketoan: logoAketoan, amall: logoAmall, aread: logoAread };
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultClientId?: number;
+  defaultClientId?: string;
 }
 
 const initialForm: ContractCreatePayload = {
-  khach_hang_id: 0,
-  so_hop_dong: "",
-  trang_thai: "dang_thuc_hien",
-  dich_vu_id: 0,
-  gia_tri_hop_dong: 0,
-  cach_tinh_phi: "theo_thang",
-  ngay_bat_dau: "",
-  ngay_ket_thuc: "",
-  nhan_vien_phu_trach_id: 0,
-  nhan_vien_ho_tro_id: null,
-  file_hop_dong: null,
-  ghi_chu: "",
-  phan_mem: "aketoan",
-  ung_dung_id: null,
-  cau_hinh_luong: "co_dinh",
-  tien_luong: 0,
-};
-const APP_LOGOS: Record<string, string> = {
-  aketoan: logoAketoan,
-  amall: logoAmall,
-  aread: logoAread,
+  clientId: "",
+  contractNumber: "",
+  startDate: "",
+  endDate: "",
+  contractValue: 0,
+  feeType: "monthly",
+  status: "active",
+  staffId: "",
+  supportStaffIds: [],
+  serviceId: "",
+  software: "aketoan",
+  applications: [],
+  salaryType: "co_dinh",
+  salaryAmount: 0,
+  notes: "",
+  fileHopDong: null,
 };
 
 const formatCurrency = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 
 export function CreateContractModal({ open, onOpenChange, defaultClientId }: Props) {
   const [form, setForm] = useState<ContractCreatePayload>({ ...initialForm });
-
-  useEffect(() => {
-    if (open) {
-      setForm({ ...initialForm, khach_hang_id: defaultClientId || 0 });
-    }
-  }, [open, defaultClientId]);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [fileName, setFileName] = useState<string | null>(null);
@@ -92,21 +70,28 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (open) {
+      setForm({ ...initialForm, clientId: defaultClientId || "" });
+      setStartDate(undefined);
+      setEndDate(undefined);
+      setFileName(null);
+      setSelectedApps([]);
+      setOtherSoftwareName("");
+    }
+  }, [open, defaultClientId]);
+
   const { data: clients = [] } = useDropdownClients();
   const { data: services = [] } = useDropdownServices();
   const { data: employees = [] } = useDropdownEmployees();
-  const { data: applications = [] } = useDropdownApplications();
   const createMutation = useCreateContract();
 
-  const updateField = useCallback(<K extends keyof ContractCreatePayload>(
-    key: K,
-    value: ContractCreatePayload[K]
-  ) => {
+  const updateField = useCallback(<K extends keyof ContractCreatePayload>(key: K, value: ContractCreatePayload[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   }, []);
 
   const handleFileSelect = useCallback((file: File) => {
-    updateField("file_hop_dong", file);
+    updateField("fileHopDong", file);
     setFileName(file.name);
   }, [updateField]);
 
@@ -118,7 +103,7 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
   }, [handleFileSelect]);
 
   const handleSubmit = useCallback(async () => {
-    if (!form.khach_hang_id || !form.so_hop_dong || !form.dich_vu_id || !form.nhan_vien_phu_trach_id) {
+    if (!form.clientId || !form.contractNumber || !form.serviceId || !form.staffId) {
       toast({ title: "Lỗi", description: "Vui lòng điền đầy đủ các trường bắt buộc.", variant: "destructive" });
       return;
     }
@@ -126,25 +111,20 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
       toast({ title: "Lỗi", description: "Vui lòng chọn ngày bắt đầu và kết thúc.", variant: "destructive" });
       return;
     }
-
     const payload: ContractCreatePayload = {
       ...form,
-      ngay_bat_dau: format(startDate, "yyyy-MM-dd"),
-      ngay_ket_thuc: format(endDate, "yyyy-MM-dd"),
+      startDate: format(startDate, "yyyy-MM-dd"),
+      endDate: format(endDate, "yyyy-MM-dd"),
+      applications: selectedApps,
     };
-
     try {
       await createMutation.mutateAsync(payload);
       toast({ title: "Thành công", description: "Đã tạo hợp đồng mới." });
-      setForm({ ...initialForm });
-      setStartDate(undefined);
-      setEndDate(undefined);
-      setFileName(null);
       onOpenChange(false);
     } catch {
-      toast({ title: "Lỗi", description: "Không thể tạo hợp đồng. Vui lòng thử lại.", variant: "destructive" });
+      toast({ title: "Lỗi", description: "Không thể tạo hợp đồng.", variant: "destructive" });
     }
-  }, [form, startDate, endDate, createMutation, onOpenChange, toast]);
+  }, [form, startDate, endDate, selectedApps, createMutation, onOpenChange, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -158,10 +138,7 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Khách hàng <span className="text-destructive">*</span></Label>
-              <Select
-                value={form.khach_hang_id ? form.khach_hang_id.toString() : ""}
-                onValueChange={(v) => updateField("khach_hang_id", Number(v))}
-              >
+              <Select value={form.clientId} onValueChange={(v) => updateField("clientId", v)}>
                 <SelectTrigger><SelectValue placeholder="Chọn khách hàng" /></SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => (
@@ -172,37 +149,26 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
             </div>
             <div className="space-y-1.5">
               <Label>Số hợp đồng <span className="text-destructive">*</span></Label>
-              <Input
-                placeholder="VD: HD-2026-001"
-                value={form.so_hop_dong}
-                onChange={(e) => updateField("so_hop_dong", e.target.value)}
-              />
+              <Input placeholder="VD: 004/HDKT/2025/TAF" value={form.contractNumber} onChange={(e) => updateField("contractNumber", e.target.value)} />
             </div>
           </div>
 
           {/* Row 2: Trạng thái + Dịch vụ */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Trạng thái hợp đồng</Label>
-              <Select
-                value={form.trang_thai}
-                onValueChange={(v) => updateField("trang_thai", v as ContractStatus)}
-              >
+              <Label>Trạng thái</Label>
+              <Select value={form.status} onValueChange={(v) => updateField("status", v as ContractStatus)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dang_thuc_hien">Đang thực hiện</SelectItem>
-                  <SelectItem value="tam_ngung">Tạm ngưng</SelectItem>
-                  <SelectItem value="da_ket_thuc">Đã kết thúc</SelectItem>
-                  <SelectItem value="huy">Huỷ</SelectItem>
+                  <SelectItem value="active">Đang thực hiện</SelectItem>
+                  <SelectItem value="suspended">Tạm ngưng</SelectItem>
+                  <SelectItem value="stopped">Ngưng</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Dịch vụ <span className="text-destructive">*</span></Label>
-              <Select
-                value={form.dich_vu_id ? form.dich_vu_id.toString() : ""}
-                onValueChange={(v) => updateField("dich_vu_id", Number(v))}
-              >
+              <Select value={form.serviceId} onValueChange={(v) => updateField("serviceId", v)}>
                 <SelectTrigger><SelectValue placeholder="Chọn dịch vụ" /></SelectTrigger>
                 <SelectContent>
                   {services.map((s) => (
@@ -217,57 +183,34 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Giá trị hợp đồng (VNĐ)</Label>
-              <Input
-                type="number"
-                min={0}
-                placeholder="0"
-                value={form.gia_tri_hop_dong || ""}
-                onChange={(e) => updateField("gia_tri_hop_dong", Number(e.target.value))}
-              />
-              {form.gia_tri_hop_dong > 0 && (
-                <p className="text-xs text-muted-foreground">{formatCurrency(form.gia_tri_hop_dong)} VNĐ</p>
-              )}
+              <Input type="number" min={0} placeholder="0" value={form.contractValue || ""} onChange={(e) => updateField("contractValue", Number(e.target.value))} />
+              {form.contractValue > 0 && <p className="text-xs text-muted-foreground">{formatCurrency(form.contractValue)} VNĐ</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Cách tính phí</Label>
-              <Select
-                value={form.cach_tinh_phi}
-                onValueChange={(v) => updateField("cach_tinh_phi", v as FeeCalculation)}
-              >
+              <Select value={form.feeType} onValueChange={(v) => updateField("feeType", v as FeeType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="theo_thang">Theo tháng</SelectItem>
-                  <SelectItem value="theo_quy">Theo quý</SelectItem>
-                  <SelectItem value="theo_nam">Theo năm</SelectItem>
-                  <SelectItem value="mot_lan">Một lần</SelectItem>
+                  <SelectItem value="monthly">Theo tháng</SelectItem>
+                  <SelectItem value="yearly">Theo năm</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Row 4: Ngày bắt đầu / kết thúc */}
+          {/* Row 4: Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Ngày bắt đầu <span className="text-destructive">*</span></Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}
-                  >
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {startDate ? format(startDate, "dd/MM/yyyy") : "Chọn ngày"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    locale={vi}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
+                  <Calendar mode="single" selected={startDate} onSelect={setStartDate} locale={vi} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
             </div>
@@ -275,36 +218,23 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
               <Label>Ngày kết thúc <span className="text-destructive">*</span></Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}
-                  >
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {endDate ? format(endDate, "dd/MM/yyyy") : "Chọn ngày"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    locale={vi}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
+                  <Calendar mode="single" selected={endDate} onSelect={setEndDate} locale={vi} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
             </div>
           </div>
 
-          {/* Row 5: Nhân viên phụ trách + hỗ trợ */}
+          {/* Row 5: Staff */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Nhân viên phụ trách <span className="text-destructive">*</span></Label>
-              <Select
-                value={form.nhan_vien_phu_trach_id ? form.nhan_vien_phu_trach_id.toString() : ""}
-                onValueChange={(v) => updateField("nhan_vien_phu_trach_id", Number(v))}
-              >
+              <Label>NV phụ trách <span className="text-destructive">*</span></Label>
+              <Select value={form.staffId} onValueChange={(v) => updateField("staffId", v)}>
                 <SelectTrigger><SelectValue placeholder="Chọn nhân viên" /></SelectTrigger>
                 <SelectContent>
                   {employees.map((e) => (
@@ -314,11 +244,8 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Nhân viên hỗ trợ</Label>
-              <Select
-                value={form.nhan_vien_ho_tro_id ? form.nhan_vien_ho_tro_id.toString() : "none"}
-                onValueChange={(v) => updateField("nhan_vien_ho_tro_id", v === "none" ? null : Number(v))}
-              >
+              <Label>NV hỗ trợ</Label>
+              <Select value={form.supportStaffIds[0] || "none"} onValueChange={(v) => updateField("supportStaffIds", v === "none" ? [] : [v])}>
                 <SelectTrigger><SelectValue placeholder="Chọn nhân viên" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">-- Không chọn --</SelectItem>
@@ -334,10 +261,7 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
           <div className="space-y-1.5">
             <Label>Upload file hợp đồng</Label>
             <div
-              className={cn(
-                "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-                dragOver ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/50"
-              )}
+              className={cn("border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors", dragOver ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/50")}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
@@ -346,98 +270,52 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
               {fileName ? (
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-sm font-medium text-foreground">{fileName}</span>
-                  <button
-                    type="button"
-                    className="p-1 rounded hover:bg-muted"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFileName(null);
-                      updateField("file_hop_dong", null);
-                    }}
-                  >
+                  <button type="button" className="p-1 rounded hover:bg-muted" onClick={(e) => { e.stopPropagation(); setFileName(null); updateField("fileHopDong", null); }}>
                     <X className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </div>
               ) : (
                 <div className="space-y-1">
                   <Upload className="h-8 w-8 text-muted-foreground mx-auto" />
-                  <p className="text-sm text-muted-foreground">
-                    Kéo thả file vào đây hoặc <span className="text-primary font-medium">nhấn để chọn</span>
-                  </p>
+                  <p className="text-sm text-muted-foreground">Kéo thả hoặc <span className="text-primary font-medium">nhấn để chọn</span></p>
                   <p className="text-xs text-muted-foreground">PDF, DOC, DOCX (tối đa 10MB)</p>
                 </div>
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFileSelect(file);
-                }}
-              />
+              <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileSelect(file); }} />
             </div>
           </div>
 
           {/* Ghi chú */}
           <div className="space-y-1.5">
             <Label>Ghi chú</Label>
-            <Textarea
-              placeholder="Nhập ghi chú..."
-              rows={3}
-              value={form.ghi_chu}
-              onChange={(e) => updateField("ghi_chu", e.target.value)}
-            />
+            <Textarea placeholder="Nhập ghi chú..." rows={3} value={form.notes} onChange={(e) => updateField("notes", e.target.value)} />
           </div>
 
           {/* Phần mềm hỗ trợ */}
           <div className="space-y-2">
             <Label>Phần mềm hỗ trợ</Label>
-            <RadioGroup
-              value={form.phan_mem}
-              onValueChange={(v) => {
-                updateField("phan_mem", v as SoftwareType);
-                if (v === "khac") updateField("ung_dung_id", null);
-              }}
-              className="flex gap-6"
-            >
+            <RadioGroup value={form.software} onValueChange={(v) => { updateField("software", v as SoftwareType); if (v === "khac") setSelectedApps([]); }} className="flex gap-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="aketoan" id="sw-aketoan" />
-                <Label htmlFor="sw-aketoan" className="font-normal cursor-pointer">
-                  Sử dụng phần mềm Aketoan
-                </Label>
+                <Label htmlFor="sw-aketoan" className="font-normal cursor-pointer">Sử dụng phần mềm Aketoan</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="khac" id="sw-khac" />
-                <Label htmlFor="sw-khac" className="font-normal cursor-pointer">
-                  Sử dụng phần mềm khác
-                </Label>
+                <Label htmlFor="sw-khac" className="font-normal cursor-pointer">Sử dụng phần mềm khác</Label>
               </div>
             </RadioGroup>
           </div>
 
-          {/* Ứng dụng đăng ký - multi-select cards (conditional) */}
-          {form.phan_mem === "aketoan" && (
+          {/* Ứng dụng cards */}
+          {form.software === "aketoan" && (
             <div className="space-y-3">
               <Label>Ứng dụng đăng ký sử dụng <span className="text-destructive">*</span></Label>
               <div className="grid grid-cols-3 gap-3">
                 {APP_LIST.map((app) => {
                   const isSelected = selectedApps.includes(app.code);
                   return (
-                    <button
-                      key={app.code}
-                      type="button"
-                      onClick={() => setSelectedApps(prev =>
-                        prev.includes(app.code) ? prev.filter(c => c !== app.code) : [...prev, app.code]
-                      )}
-                      className={cn(
-                        "flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all",
-                        isSelected
-                          ? "border-primary bg-primary/5 shadow-sm"
-                          : "border-border hover:border-muted-foreground/30 bg-card"
-                      )}
-                    >
+                    <button key={app.code} type="button" onClick={() => setSelectedApps(prev => prev.includes(app.code) ? prev.filter(c => c !== app.code) : [...prev, app.code])}
+                      className={cn("flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all", isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-muted-foreground/30 bg-card")}>
                       <Checkbox checked={isSelected} className="mt-0.5 pointer-events-none" tabIndex={-1} />
                       <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white">
                         <img src={APP_LOGOS[app.code]} alt={app.name} className="w-8 h-8 object-contain" />
@@ -458,9 +336,7 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
                     return (
                       <span key={code} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: app.bgColor, color: app.color }}>
                         {app.name}
-                        <button type="button" onClick={() => setSelectedApps(prev => prev.filter(c => c !== code))} className="hover:opacity-70">
-                          <X className="h-3 w-3" />
-                        </button>
+                        <button type="button" onClick={() => setSelectedApps(prev => prev.filter(c => c !== code))} className="hover:opacity-70"><X className="h-3 w-3" /></button>
                       </span>
                     );
                   })}
@@ -469,15 +345,10 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
             </div>
           )}
 
-          {/* Phần mềm khác - input */}
-          {form.phan_mem === "khac" && (
+          {form.software === "khac" && (
             <div className="space-y-1.5">
               <Label>Tên phần mềm <span className="text-destructive">*</span></Label>
-              <Input
-                value={otherSoftwareName}
-                onChange={(e) => setOtherSoftwareName(e.target.value)}
-                placeholder="Nhập tên phần mềm đang sử dụng"
-              />
+              <Input value={otherSoftwareName} onChange={(e) => setOtherSoftwareName(e.target.value)} placeholder="Nhập tên phần mềm đang sử dụng" />
             </div>
           )}
 
@@ -505,11 +376,7 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Cấu hình lương</Label>
-              <RadioGroup
-                value={form.cau_hinh_luong}
-                onValueChange={(v) => updateField("cau_hinh_luong", v as SalaryConfig)}
-                className="flex flex-col gap-2"
-              >
+              <RadioGroup value={form.salaryType} onValueChange={(v) => updateField("salaryType", v as SalaryConfig)} className="flex flex-col gap-2">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="co_dinh" id="sal-fixed" />
                   <Label htmlFor="sal-fixed" className="font-normal cursor-pointer">Cố định</Label>
@@ -520,28 +387,18 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
                 </div>
               </RadioGroup>
             </div>
-            {form.cau_hinh_luong === "co_dinh" && (
+            {form.salaryType === "co_dinh" && (
               <div className="space-y-1.5">
                 <Label>Tiền lương (VNĐ)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  placeholder="0"
-                  value={form.tien_luong || ""}
-                  onChange={(e) => updateField("tien_luong", Number(e.target.value))}
-                />
-                {form.tien_luong > 0 && (
-                  <p className="text-xs text-muted-foreground">{formatCurrency(form.tien_luong)} VNĐ</p>
-                )}
+                <Input type="number" min={0} placeholder="0" value={form.salaryAmount || ""} onChange={(e) => updateField("salaryAmount", Number(e.target.value))} />
+                {form.salaryAmount > 0 && <p className="text-xs text-muted-foreground">{formatCurrency(form.salaryAmount)} VNĐ</p>}
               </div>
             )}
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Huỷ
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Huỷ</Button>
           <Button onClick={handleSubmit} disabled={createMutation.isPending}>
             {createMutation.isPending ? "Đang tạo..." : "Tạo hợp đồng"}
           </Button>
