@@ -1,10 +1,17 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Pencil, Trash2, Eye, Search, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Trash2, Eye, Search, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePagination } from "@/hooks/usePagination";
+import { DataPagination } from "@/components/DataPagination";
+import { useEmployeeClients } from "@/hooks/useEmployees";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import type { Employee, EmployeeTotals, EmployeeClient } from "@/types/employee";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/usePagination";
 import { DataPagination } from "@/components/DataPagination";
