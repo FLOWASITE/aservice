@@ -68,42 +68,59 @@ export default function NhanSuPage() {
           <EmployeeStatCards stats={stats || defaultStats} />
 
           {/* Controls section */}
-          <div className="space-y-4">
-            {/* Status tabs */}
-            <div className="flex items-center gap-1">
-              {STATUS_TABS.map((t) => {
-                const isActive = statusTab === t.value;
-                const count = (tabCounts || defaultCounts)[t.value];
-                return (
-                  <button
-                    key={t.value}
-                    onClick={() => setStatusTab(t.value)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {t.label}
-                    <span
-                      className={`inline-flex items-center justify-center rounded-full min-w-[20px] h-5 px-1.5 text-[11px] font-semibold ${
+          <div className="space-y-2">
+            {/* Row 1: Status tabs + Search */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                {STATUS_TABS.map((t) => {
+                  const isActive = statusTab === t.value;
+                  const count = (tabCounts || defaultCounts)[t.value];
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => setStatusTab(t.value)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                         isActive
-                          ? "bg-primary-foreground/20 text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       }`}
                     >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+                      {t.label}
+                      <span
+                        className={`inline-flex items-center justify-center rounded-full min-w-[18px] h-4 px-1 text-[10px] font-semibold ${
+                          isActive
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <form onSubmit={handleSearch} className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    className="pl-7 h-7 w-[160px] text-xs"
+                    placeholder="Tìm kiếm..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" size="sm" className="h-7 text-xs px-3 bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                  Tìm kiếm
+                </Button>
+              </form>
             </div>
 
-            {/* Filters row */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-medium text-foreground">Nhân sự</span>
+            {/* Row 2: Filters + Total + Add */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-medium text-foreground">Nhân sự</span>
               <Select value={month.toString()} onValueChange={(v) => setMonth(parseInt(v))}>
-                <SelectTrigger className="w-[110px] h-8 text-sm">
+                <SelectTrigger className="w-[100px] h-7 text-xs">
                   <SelectValue placeholder="Tháng" />
                 </SelectTrigger>
                 <SelectContent>
@@ -113,7 +130,7 @@ export default function NhanSuPage() {
                 </SelectContent>
               </Select>
               <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
-                <SelectTrigger className="w-[90px] h-8 text-sm">
+                <SelectTrigger className="w-[80px] h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -123,33 +140,15 @@ export default function NhanSuPage() {
                 </SelectContent>
               </Select>
 
-              <form onSubmit={handleSearch} className="flex gap-2 ml-auto">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    className="pl-8 h-8 w-[180px] text-sm"
-                    placeholder="Tìm kiếm..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" size="sm" className="h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm px-4">
-                  Tìm kiếm
-                </Button>
-              </form>
-            </div>
-
-            {/* Total + Add */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground ml-auto">
                 Tổng: <strong className="text-foreground">{employees?.length || 0}</strong>
               </span>
               <Button
                 size="sm"
                 onClick={() => setAddModalOpen(true)}
-                className="h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm"
+                className="h-7 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               >
-                <Plus className="h-4 w-4 mr-1" /> Thêm mới
+                <Plus className="h-3.5 w-3.5 mr-1" /> Thêm mới
               </Button>
             </div>
           </div>
