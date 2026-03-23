@@ -3,6 +3,11 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CalendarIcon, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { APP_LIST } from "@/types/application";
+import { Checkbox } from "@/components/ui/checkbox";
+import logoAketoan from "@/assets/logo-aketoan.png";
+import logoAmall from "@/assets/logo-amall.png";
+import logoAread from "@/assets/logo-aread.png";
 import {
   Dialog,
   DialogContent,
@@ -62,6 +67,11 @@ const initialForm: ContractCreatePayload = {
   cau_hinh_luong: "co_dinh",
   tien_luong: 0,
 };
+const APP_LOGOS: Record<string, string> = {
+  aketoan: logoAketoan,
+  amall: logoAmall,
+  aread: logoAread,
+};
 
 const formatCurrency = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 
@@ -77,6 +87,8 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
   const [endDate, setEndDate] = useState<Date>();
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
+  const [otherSoftwareName, setOtherSoftwareName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -405,23 +417,89 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
             </RadioGroup>
           </div>
 
-          {/* Ứng dụng đăng ký (conditional) */}
+          {/* Ứng dụng đăng ký - multi-select cards (conditional) */}
           {form.phan_mem === "aketoan" && (
-            <div className="space-y-1.5">
-              <Label>Ứng dụng đăng ký sử dụng</Label>
-              <Select
-                value={form.ung_dung_id ? form.ung_dung_id.toString() : ""}
-                onValueChange={(v) => updateField("ung_dung_id", Number(v))}
-              >
-                <SelectTrigger><SelectValue placeholder="Chọn ứng dụng" /></SelectTrigger>
-                <SelectContent>
-                  {applications.map((a) => (
-                    <SelectItem key={a.id} value={a.id.toString()}>{a.ten}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-3">
+              <Label>Ứng dụng đăng ký sử dụng <span className="text-destructive">*</span></Label>
+              <div className="grid grid-cols-3 gap-3">
+                {APP_LIST.map((app) => {
+                  const isSelected = selectedApps.includes(app.code);
+                  return (
+                    <button
+                      key={app.code}
+                      type="button"
+                      onClick={() => setSelectedApps(prev =>
+                        prev.includes(app.code) ? prev.filter(c => c !== app.code) : [...prev, app.code]
+                      )}
+                      className={cn(
+                        "flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all",
+                        isSelected
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border hover:border-muted-foreground/30 bg-card"
+                      )}
+                    >
+                      <Checkbox checked={isSelected} className="mt-0.5 pointer-events-none" tabIndex={-1} />
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                        <img src={APP_LOGOS[app.code]} alt={app.name} className="w-8 h-8 object-contain" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-foreground">{app.name}</div>
+                        <div className="text-xs text-muted-foreground leading-snug">{app.fullName}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedApps.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedApps.map((code) => {
+                    const app = APP_LIST.find(a => a.code === code);
+                    if (!app) return null;
+                    return (
+                      <span key={code} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: app.bgColor, color: app.color }}>
+                        {app.name}
+                        <button type="button" onClick={() => setSelectedApps(prev => prev.filter(c => c !== code))} className="hover:opacity-70">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
+
+          {/* Phần mềm khác - input */}
+          {form.phan_mem === "khac" && (
+            <div className="space-y-1.5">
+              <Label>Tên phần mềm <span className="text-destructive">*</span></Label>
+              <Input
+                value={otherSoftwareName}
+                onChange={(e) => setOtherSoftwareName(e.target.value)}
+                placeholder="Nhập tên phần mềm đang sử dụng"
+              />
+            </div>
+          )}
+
+          {/* Mô tả */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Thông tin chung</Label>
+              <Textarea rows={3} placeholder="Mô tả chung về công ty" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Loại hình doanh nghiệp</Label>
+              <Textarea rows={3} placeholder="Mô tả loại hình" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Sản phẩm kinh doanh chính</Label>
+              <Textarea rows={3} placeholder="Liệt kê sản phẩm chính" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Chi phí chính</Label>
+              <Textarea rows={3} placeholder="Liệt kê chi phí chính" />
+            </div>
+          </div>
 
           {/* Cấu hình lương */}
           <div className="grid grid-cols-2 gap-4">
