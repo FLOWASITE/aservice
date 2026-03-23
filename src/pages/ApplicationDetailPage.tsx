@@ -1,15 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ExternalLink, Settings, RefreshCw, Calculator, Store, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, Settings, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { APP_LIST } from "@/types/application";
+import logoAketoan from "@/assets/logo-aketoan.png";
+import logoAmall from "@/assets/logo-amall.png";
+import logoAread from "@/assets/logo-aread.png";
 
-const APP_ICONS: Record<string, React.ReactNode> = {
-  aketoan: <Calculator className="h-8 w-8" />,
-  amall: <Store className="h-8 w-8" />,
-  aread: <FileText className="h-8 w-8" />,
+const APP_LOGOS: Record<string, string> = {
+  aketoan: logoAketoan,
+  amall: logoAmall,
+  aread: logoAread,
 };
 
 // Mock data
@@ -72,11 +75,8 @@ export default function ApplicationDetailPage() {
       {/* App info card */}
       <Card className="border-2" style={{ borderColor: app.color + "40" }}>
         <CardContent className="flex items-center gap-5 py-5">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: app.bgColor, color: app.color }}
-          >
-            {APP_ICONS[app.code]}
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden bg-white border border-border/30">
+            <img src={APP_LOGOS[app.code]} alt={app.name} className="w-14 h-14 object-contain" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
