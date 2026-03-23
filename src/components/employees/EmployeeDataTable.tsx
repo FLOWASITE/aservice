@@ -175,19 +175,21 @@ export function EmployeeDataTable({ employees, isLoading, totals, onDelete }: Pr
     <div className="space-y-3">
       {/* Search bar + advanced filters toggle */}
       <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm theo mã, tên, email, chức vụ, nhóm..."
-            className="pl-9 h-9"
-            value={globalSearch}
-            onChange={(e) => setGlobalSearch(e.target.value)}
-          />
+        <div className="premium-search flex-1 max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm theo mã, tên, email, chức vụ, nhóm..."
+              className="pl-9 h-9 border-0 shadow-none focus-visible:ring-0"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+            />
           {globalSearch && (
             <button className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted" onClick={() => setGlobalSearch("")}>
               <X className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           )}
+          </div>
         </div>
 
         <Button
@@ -218,7 +220,7 @@ export function EmployeeDataTable({ employees, isLoading, totals, onDelete }: Pr
 
       {/* Advanced filter panel */}
       {showAdvanced && (
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 p-4 rounded-lg border bg-muted/30">
+        <div className="glass-panel grid grid-cols-2 lg:grid-cols-5 gap-3 p-4">
           <div className="space-y-1">
             <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">SL DV kế toán</label>
             <div className="flex gap-1">
@@ -258,7 +260,7 @@ export function EmployeeDataTable({ employees, isLoading, totals, onDelete }: Pr
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-x-auto bg-card">
+      <div className="premium-table-wrapper overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40">
