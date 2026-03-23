@@ -57,7 +57,8 @@ export interface ClientCreatePayload {
 
   // Section 4
   software: "aketoan" | "other";
-  applicationId?: number;
+  applications?: string[];
+  otherSoftwareName?: string;
   description: ClientDescription;
 }
 

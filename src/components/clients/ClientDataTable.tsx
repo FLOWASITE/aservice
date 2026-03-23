@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import type { Client } from "@/types/client";
+import { AppIcons } from "./AppIcons";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -13,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/usePagination";
@@ -169,10 +170,8 @@ export function ClientDataTable({ clients, isLoading, onEditClient, onDeleteClie
                         ))}
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">
-                      {client.ung_dung ? (
-                        <CheckCircle className="h-5 w-5 text-success mx-auto" />
-                      ) : null}
+                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                      <AppIcons clientId={client.id} apps={client.ung_dung_list || []} otherSoftware={client.other_software} />
                     </TableCell>
                     <TableCell className="text-right text-sm tabular-nums">
                       {formatNumber(client.phi_dich_vu_toi_thieu)}
