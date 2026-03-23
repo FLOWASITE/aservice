@@ -5,6 +5,7 @@ import {
   getMockEmployeeTabCounts,
   getMockEmployees,
   getMockEmployeeClients,
+  getMockEmployeeTotals,
   mockGroups,
 } from "@/mocks/employeeMock";
 import type { EmployeeStatus, EmployeeCreatePayload, GroupCreatePayload, Group } from "@/types/employee";
@@ -38,6 +39,16 @@ export function useEmployees(status: EmployeeStatus, search?: string) {
     queryFn: async () => {
       if (USE_MOCK) { await delay(); return getMockEmployees(status, search); }
       return employeeService.getEmployees({ status, search });
+    },
+  });
+}
+
+export function useEmployeeTotals() {
+  return useQuery({
+    queryKey: ["employees", "totals"],
+    queryFn: async () => {
+      if (USE_MOCK) { await delay(); return getMockEmployeeTotals(); }
+      return getMockEmployeeTotals();
     },
   });
 }
