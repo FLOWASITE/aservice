@@ -3,8 +3,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, Calculator, Store, FileText } from "lucide-react";
+import { X } from "lucide-react";
 import { APP_LIST } from "@/types/application";
+import logoAketoan from "@/assets/logo-aketoan.png";
+import logoAmall from "@/assets/logo-amall.png";
+import logoAread from "@/assets/logo-aread.png";
+
+const APP_LOGOS: Record<string, string> = {
+  aketoan: logoAketoan,
+  amall: logoAmall,
+  aread: logoAread,
+};
 
 interface Props {
   form: Record<string, any>;
