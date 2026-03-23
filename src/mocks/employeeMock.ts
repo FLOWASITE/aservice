@@ -35,6 +35,15 @@ const employeesByStatus: Record<string, Employee[]> = {
   khac: [],
 };
 
+export function removeEmployeeFromMock(id: number) {
+  for (const key of Object.keys(employeesByStatus)) {
+    const idx = employeesByStatus[key].findIndex((e) => e.id === id);
+    if (idx >= 0) {
+      employeesByStatus[key].splice(idx, 1);
+    }
+  }
+}
+
 export function getMockEmployeeStats(): EmployeeStats {
   return {
     khach_hang_phu_trach: 133,
