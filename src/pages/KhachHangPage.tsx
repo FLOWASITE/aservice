@@ -36,6 +36,7 @@ export default function KhachHangPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
   const [contractModalOpen, setContractModalOpen] = useState(false);
+  const [contractClientId, setContractClientId] = useState<number | undefined>();
 
   const handleEditClient = useCallback((client: Client) => {
     setEditClient(client);
@@ -171,11 +172,11 @@ export default function KhachHangPage() {
         showCreateContract={activeTab === "cho_thuc_hien"}
         onEditClient={handleEditClient}
         onDeleteClient={(client) => console.log("Delete client", client.id)}
-        onCreateContract={() => setContractModalOpen(true)}
+        onCreateContract={(client) => { setContractClientId(client.id); setContractModalOpen(true); }}
       />
 
       <AddClientModal open={addModalOpen} onOpenChange={handleModalClose} editClient={editClient} />
-      <CreateContractModal open={contractModalOpen} onOpenChange={setContractModalOpen} />
+      <CreateContractModal open={contractModalOpen} onOpenChange={setContractModalOpen} defaultClientId={contractClientId} />
     </div>
   );
 }
