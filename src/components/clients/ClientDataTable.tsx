@@ -17,6 +17,7 @@ import { DataPagination } from "@/components/DataPagination";
 interface Props {
   clients: Client[];
   isLoading?: boolean;
+  onEditClient?: (client: Client) => void;
 }
 
 const formatNumber = (v: number) =>
