@@ -11,7 +11,7 @@ export function useContracts() {
   return useQuery<Contract[]>({
     queryKey: ["contracts"],
     queryFn: async () => {
-      if (USE_MOCK) { await delay(); return mockContracts; }
+      if (USE_MOCK) { await delay(); return [...mockContracts]; }
       return contractService.getContracts();
     },
   });
