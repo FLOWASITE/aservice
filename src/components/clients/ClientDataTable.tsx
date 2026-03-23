@@ -120,7 +120,7 @@ export function ClientDataTable({ clients, isLoading, onEditClient }: Props) {
                 </TableRow>
               ) : (
                 paginatedData.map((client, idx) => (
-                  <TableRow key={client.id} className="hover:bg-muted/30">
+                  <TableRow key={client.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => onEditClient?.(client)}>
                     <TableCell className="text-center text-sm">
                       {(currentPage - 1) * pageSize + idx + 1}
                     </TableCell>
@@ -181,7 +181,7 @@ export function ClientDataTable({ clients, isLoading, onEditClient }: Props) {
                         <button className="p-1 rounded hover:bg-muted" title="Xem">
                           <Eye className="h-4 w-4 text-muted-foreground" />
                         </button>
-                        <button className="p-1 rounded hover:bg-muted" title="Sửa">
+                        <button className="p-1 rounded hover:bg-muted" title="Sửa" onClick={(e) => { e.stopPropagation(); onEditClient?.(client); }}>
                           <Edit className="h-4 w-4 text-muted-foreground" />
                         </button>
                       </div>
