@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -6,12 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Eye, Edit, Trash2, FileSignature, Check, AlertTriangle, XCircle } from "lucide-react";
+import { Eye, Edit, Trash2, FileSignature, Check, AlertTriangle, XCircle, ArrowUpDown, ArrowUp, ArrowDown, X } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import { DataPagination } from "@/components/DataPagination";
+import { Button } from "@/components/ui/button";
 import type { Contract, ContractStatus } from "@/types/contract";
 
 interface Props {
@@ -19,6 +23,9 @@ interface Props {
   isLoading?: boolean;
   onDelete?: (contract: Contract) => void;
 }
+
+type SortKey = "clientName" | "contractNumber" | "startDate" | "endDate" | "contractValue" | "feeType" | "status" | "staffName" | "serviceName";
+type SortDir = "asc" | "desc";
 
 const formatCurrency = (v: number) => new Intl.NumberFormat("vi-VN").format(v);
 const formatDate = (d: string | null) => {
@@ -64,6 +71,32 @@ function FeeBadge({ feeType, label }: { feeType: string; label: string }) {
   return <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{label}</span>;
 }
 
+function SortButton({ sortKey, currentSort, onSort }: { sortKey: SortKey; currentSort: { key: SortKey; dir: SortDir } | null; onSort: (key: SortKey) => void }) {
+  const isActive = currentSort?.key === sortKey;
+  const Icon = isActive ? (currentSort.dir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(sortKey)}
+      className={`ml-1 p-0.5 rounded hover:bg-background/80 transition-colors ${isActive ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+      title="Sắp xếp"
+    >
+      <Icon className="h-3.5 w-3.5" />
+    </button>
+  );
+}
+
+const statusLabels: Record<ContractStatus, string> = {
+  active: "Đang thực hiện",
+  suspended: "Tạm ngưng",
+  stopped: "Ngưng",
+};
+
+const feeTypeLabels: Record<string, string> = {
+  monthly: "Tháng",
+  yearly: "Năm",
+};
+
 export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
   const [filters, setFilters] = useState({
     clientName: "", contractNumber: "",
@@ -71,12 +104,33 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
     valueMin: "", valueMax: "",
     feeType: "", status: "", staffName: "", supportName: "", serviceName: "",
   });
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Contract | null>(null);
 
-  const setFilter = (key: string, value: string) => setFilters(prev => ({ ...prev, [key]: value }));
+  const setFilter = useCallback((key: string, value: string) => setFilters(prev => ({ ...prev, [key]: value })), []);
 
-  const filtered = useMemo(() => {
-    return contracts.filter((c) => {
+  const hasActiveFilters = useMemo(() => Object.values(filters).some(v => v !== ""), [filters]);
+
+  const clearFilters = useCallback(() => {
+    setFilters({
+      clientName: "", contractNumber: "",
+      startFrom: "", startTo: "", endFrom: "", endTo: "",
+      valueMin: "", valueMax: "",
+      feeType: "", status: "", staffName: "", supportName: "", serviceName: "",
+    });
+  }, []);
+
+  const handleSort = useCallback((key: SortKey) => {
+    setSort(prev => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return null; // third click removes sort
+    });
+  }, []);
+
+  const processedData = useMemo(() => {
+    // 1. Filter
+    let result = contracts.filter((c) => {
       if (filters.clientName && !c.clientName.toLowerCase().includes(filters.clientName.toLowerCase())) return false;
       if (filters.contractNumber && !c.contractNumber.toLowerCase().includes(filters.contractNumber.toLowerCase())) return false;
       if (filters.staffName && !c.staffName.toLowerCase().includes(filters.staffName.toLowerCase())) return false;
@@ -92,72 +146,128 @@ export function ContractDataTable({ contracts, isLoading, onDelete }: Props) {
       if (filters.valueMax && c.contractValue > Number(filters.valueMax)) return false;
       return true;
     });
-  }, [contracts, filters]);
 
-  const { paginatedData, currentPage, pageSize, totalPages, totalItems, pageSizeOptions, goToPage, setPageSize } = usePagination(filtered);
+    // 2. Sort
+    if (sort) {
+      result = [...result].sort((a, b) => {
+        let cmp = 0;
+        switch (sort.key) {
+          case "clientName": cmp = a.clientName.localeCompare(b.clientName, "vi"); break;
+          case "contractNumber": cmp = a.contractNumber.localeCompare(b.contractNumber, "vi"); break;
+          case "startDate": cmp = (a.startDate || "").localeCompare(b.startDate || ""); break;
+          case "endDate": cmp = (a.endDate || "9999").localeCompare(b.endDate || "9999"); break;
+          case "contractValue": cmp = a.contractValue - b.contractValue; break;
+          case "feeType": cmp = a.feeType.localeCompare(b.feeType); break;
+          case "status": cmp = a.status.localeCompare(b.status); break;
+          case "staffName": cmp = a.staffName.localeCompare(b.staffName, "vi"); break;
+          case "serviceName": cmp = a.serviceName.localeCompare(b.serviceName, "vi"); break;
+        }
+        return sort.dir === "asc" ? cmp : -cmp;
+      });
+    }
+
+    return result;
+  }, [contracts, filters, sort]);
+
+  const { paginatedData, currentPage, pageSize, totalPages, totalItems, pageSizeOptions, goToPage, setPageSize } = usePagination(processedData);
 
   return (
     <>
+      {/* Active filter indicator */}
+      {hasActiveFilters && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Đang lọc: <strong className="text-foreground">{processedData.length}</strong> / {contracts.length} hợp đồng</span>
+          <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={clearFilters}>
+            <X className="h-3 w-3 mr-1" /> Xóa bộ lọc
+          </Button>
+        </div>
+      )}
+
       <div className="border rounded-lg overflow-hidden bg-card">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              {/* Header row */}
+              {/* Header row with sort */}
               <TableRow className="bg-muted/50">
                 <TableHead className="w-12 text-center">STT</TableHead>
-                <TableHead className="min-w-[200px]">Khách hàng</TableHead>
-                <TableHead className="min-w-[150px]">Số hợp đồng</TableHead>
-                <TableHead className="min-w-[180px]">Ngày bắt đầu</TableHead>
-                <TableHead className="min-w-[180px]">Ngày kết thúc</TableHead>
-                <TableHead className="min-w-[180px] text-right">Giá trị</TableHead>
-                <TableHead className="min-w-[100px]">Cách tính phí</TableHead>
-                <TableHead className="w-20 text-center">Trạng thái</TableHead>
-                <TableHead className="min-w-[170px]">NV phụ trách</TableHead>
+                <TableHead className="min-w-[200px]">
+                  <div className="flex items-center">Khách hàng <SortButton sortKey="clientName" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="min-w-[150px]">
+                  <div className="flex items-center">Số hợp đồng <SortButton sortKey="contractNumber" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="min-w-[180px]">
+                  <div className="flex items-center">Ngày bắt đầu <SortButton sortKey="startDate" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="min-w-[180px]">
+                  <div className="flex items-center">Ngày kết thúc <SortButton sortKey="endDate" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="min-w-[180px]">
+                  <div className="flex items-center justify-end">Giá trị <SortButton sortKey="contractValue" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="min-w-[100px]">
+                  <div className="flex items-center">Cách tính phí <SortButton sortKey="feeType" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="w-20 text-center">
+                  <div className="flex items-center justify-center">Trạng thái <SortButton sortKey="status" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
+                <TableHead className="min-w-[170px]">
+                  <div className="flex items-center">NV phụ trách <SortButton sortKey="staffName" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
                 <TableHead className="min-w-[140px]">NV hỗ trợ</TableHead>
-                <TableHead className="min-w-[170px]">Dịch vụ</TableHead>
+                <TableHead className="min-w-[170px]">
+                  <div className="flex items-center">Dịch vụ <SortButton sortKey="serviceName" currentSort={sort} onSort={handleSort} /></div>
+                </TableHead>
                 <TableHead className="w-24 text-center sticky right-0 bg-muted/50 z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]">Thao tác</TableHead>
               </TableRow>
               {/* Filter row */}
               <TableRow className="bg-muted/20">
                 <TableHead />
-                <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.clientName} onChange={e => setFilter("clientName", e.target.value)} /></TableHead>
-                <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.contractNumber} onChange={e => setFilter("contractNumber", e.target.value)} /></TableHead>
+                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.clientName} onChange={e => setFilter("clientName", e.target.value)} /></TableHead>
+                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.contractNumber} onChange={e => setFilter("contractNumber", e.target.value)} /></TableHead>
                 <TableHead>
                   <div className="flex gap-1">
-                    <Input type="date" className="h-7 text-xs" title="Từ ngày" value={filters.startFrom} onChange={e => setFilter("startFrom", e.target.value)} />
-                    <Input type="date" className="h-7 text-xs" title="Đến ngày" value={filters.startTo} onChange={e => setFilter("startTo", e.target.value)} />
+                    <Input type="date" className="h-7 text-xs flex-1" title="Từ ngày" value={filters.startFrom} onChange={e => setFilter("startFrom", e.target.value)} />
+                    <Input type="date" className="h-7 text-xs flex-1" title="Đến ngày" value={filters.startTo} onChange={e => setFilter("startTo", e.target.value)} />
                   </div>
                 </TableHead>
                 <TableHead>
                   <div className="flex gap-1">
-                    <Input type="date" className="h-7 text-xs" title="Từ ngày" value={filters.endFrom} onChange={e => setFilter("endFrom", e.target.value)} />
-                    <Input type="date" className="h-7 text-xs" title="Đến ngày" value={filters.endTo} onChange={e => setFilter("endTo", e.target.value)} />
+                    <Input type="date" className="h-7 text-xs flex-1" title="Từ ngày" value={filters.endFrom} onChange={e => setFilter("endFrom", e.target.value)} />
+                    <Input type="date" className="h-7 text-xs flex-1" title="Đến ngày" value={filters.endTo} onChange={e => setFilter("endTo", e.target.value)} />
                   </div>
                 </TableHead>
                 <TableHead>
                   <div className="flex gap-1">
-                    <Input type="number" placeholder="Tối thiểu" className="h-7 text-xs" value={filters.valueMin} onChange={e => setFilter("valueMin", e.target.value)} />
-                    <Input type="number" placeholder="Tối đa" className="h-7 text-xs" value={filters.valueMax} onChange={e => setFilter("valueMax", e.target.value)} />
+                    <Input type="number" placeholder="Min" className="h-7 text-xs flex-1" value={filters.valueMin} onChange={e => setFilter("valueMin", e.target.value)} />
+                    <Input type="number" placeholder="Max" className="h-7 text-xs flex-1" value={filters.valueMax} onChange={e => setFilter("valueMax", e.target.value)} />
                   </div>
                 </TableHead>
                 <TableHead>
-                  <select className="h-7 w-full rounded border border-input bg-background text-xs px-1" value={filters.feeType} onChange={e => setFilter("feeType", e.target.value)}>
-                    <option value="">Tìm kiếm</option>
-                    <option value="monthly">Tháng</option>
-                    <option value="yearly">Năm</option>
-                  </select>
+                  <Select value={filters.feeType || "all"} onValueChange={v => setFilter("feeType", v === "all" ? "" : v)}>
+                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Tất cả" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tất cả</SelectItem>
+                      {Object.entries(feeTypeLabels).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TableHead>
                 <TableHead>
-                  <select className="h-7 w-full rounded border border-input bg-background text-xs px-1" value={filters.status} onChange={e => setFilter("status", e.target.value)}>
-                    <option value="">Tìm kiếm</option>
-                    <option value="active">Đang thực hiện</option>
-                    <option value="suspended">Tạm ngưng</option>
-                    <option value="stopped">Ngưng</option>
-                  </select>
+                  <Select value={filters.status || "all"} onValueChange={v => setFilter("status", v === "all" ? "" : v)}>
+                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Tất cả" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tất cả</SelectItem>
+                      {Object.entries(statusLabels).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TableHead>
-                <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.staffName} onChange={e => setFilter("staffName", e.target.value)} /></TableHead>
-                <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.supportName} onChange={e => setFilter("supportName", e.target.value)} /></TableHead>
-                <TableHead><Input placeholder="Tìm kiếm" className="h-7 text-xs" value={filters.serviceName} onChange={e => setFilter("serviceName", e.target.value)} /></TableHead>
+                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.staffName} onChange={e => setFilter("staffName", e.target.value)} /></TableHead>
+                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.supportName} onChange={e => setFilter("supportName", e.target.value)} /></TableHead>
+                <TableHead><Input placeholder="Tìm kiếm..." className="h-7 text-xs" value={filters.serviceName} onChange={e => setFilter("serviceName", e.target.value)} /></TableHead>
                 <TableHead className="sticky right-0 bg-muted/20 z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]" />
               </TableRow>
             </TableHeader>
