@@ -3,7 +3,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
+import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import KhachHangPage from "@/pages/KhachHangPage";
 import NhanSuPage from "@/pages/NhanSuPage";
@@ -21,18 +24,30 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppLayout>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/khach-hang" element={<KhachHangPage />} />
-            <Route path="/nhan-su" element={<NhanSuPage />} />
-            <Route path="/to-khai-thue" element={<ToKhaiThuePage />} />
-            <Route path="/trang-thai-dn" element={<TrangThaiDNPage />} />
-            <Route path="/hop-dong" element={<HopDongPage />} />
-            <Route path="/cong-no" element={<CongNoPage />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Routes>
+                      <Route path="/" element={<DashboardPage />} />
+                      <Route path="/khach-hang" element={<KhachHangPage />} />
+                      <Route path="/nhan-su" element={<NhanSuPage />} />
+                      <Route path="/to-khai-thue" element={<ToKhaiThuePage />} />
+                      <Route path="/trang-thai-dn" element={<TrangThaiDNPage />} />
+                      <Route path="/hop-dong" element={<HopDongPage />} />
+                      <Route path="/cong-no" element={<CongNoPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
           </Routes>
-        </AppLayout>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
