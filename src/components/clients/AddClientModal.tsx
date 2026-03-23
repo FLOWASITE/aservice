@@ -135,7 +135,6 @@ export function AddClientModal({ open, onOpenChange, editClient }: Props) {
   };
 
   const groupLabel = form.groupId ? `Nhóm #${form.groupId}` : "—";
-  const staffLabel = form.assignedStaffId ? `NV #${form.assignedStaffId}` : "—";
 
   return (
     <>
@@ -216,7 +215,7 @@ export function AddClientModal({ open, onOpenChange, editClient }: Props) {
                   <div><span className="text-muted-foreground">Loại hình:</span> <strong>{form.businessType === "company" ? "Công ty" : "Hộ KD"}</strong></div>
                   <div><span className="text-muted-foreground">Thông tư:</span> <strong>{form.appliedCircular || "—"}</strong></div>
                   <div><span className="text-muted-foreground">Nhóm KH:</span> <strong>{groupLabel}</strong></div>
-                  <div><span className="text-muted-foreground">NV phụ trách:</span> <strong>{staffLabel}</strong></div>
+                  
                   <div><span className="text-muted-foreground">Phần mềm:</span> <strong>{form.software === "aketoan" ? "Aketoan" : "Khác"}</strong></div>
                 </div>
               </div>
