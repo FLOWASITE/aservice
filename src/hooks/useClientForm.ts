@@ -8,9 +8,16 @@ import {
   mockGroupsDropdown,
   mockTaxLookup,
 } from "@/mocks/clientFormMock";
+import { addClientToMock } from "@/mocks/clientMock";
 import type { ClientCreatePayload, TaxLookupResult } from "@/types/clientForm";
+import type { Client, ClientStatus } from "@/types/client";
 
 const delay = () => new Promise<void>((r) => setTimeout(r, 200));
+
+const AVATAR_COLORS = [
+  "hsl(215 70% 42%)", "hsl(152 60% 42%)", "hsl(0 72% 51%)",
+  "hsl(280 60% 50%)", "hsl(38 92% 50%)", "hsl(195 70% 45%)",
+];
 
 export function useBusinessFields() {
   return useQuery({ queryKey: ["dropdown", "businessFields"], queryFn: async () => { await delay(); return mockBusinessFields; } });
@@ -50,7 +57,34 @@ export function useCreateClient() {
   return useMutation({
     mutationFn: async (payload: ClientCreatePayload) => {
       await new Promise<void>((r) => setTimeout(r, 500));
-      return { id: Date.now(), ...payload };
+
+      const newId = Date.now();
+      const initial = payload.name.charAt(0) || "?";
+      const status: ClientStatus = "dang_thuc_hien_ke_toan";
+
+      const newClient: Client = {
+        id: newId,
+        stt: newId,
+        ten: payload.name,
+        ten_viet_tat: initial,
+        nhom: "—",
+        nhan_vien_phu_trach: "—",
+        nhan_vien_ho_tro: [],
+        ung_dung: false,
+        ung_dung_list: [],
+        phi_dich_vu_toi_thieu: 0,
+        phi_dich_vu_toi_da: 0,
+        cong_no: 0,
+        hoa_don_di: 0,
+        hoa_don_dien_tu: "chua_ket_noi",
+        thue_dien_tu: "chua_nop",
+        chu_ky_so: "chua_dang_ky",
+        trang_thai: status,
+        avatar_color: AVATAR_COLORS[newId % AVATAR_COLORS.length],
+      };
+
+      addClientToMock(newClient);
+      return newClient;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clients"] }),
   });
