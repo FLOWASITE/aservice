@@ -1,5 +1,10 @@
 export type EmployeeStatus = "dang_lam_viec" | "nghi_thai_san" | "nghi_viec" | "khac";
 
+export interface Seniority {
+  years: number;
+  months: number;
+}
+
 export interface Employee {
   id: number;
   stt: number;
@@ -10,27 +15,30 @@ export interface Employee {
   nhom: string;
   nhom_id: number;
   avatar_color: string;
-  thoi_gian_lam_viec_min: number;
-  thoi_gian_lam_viec_max: number;
-  so_luong_dv_ke_toan_min: number;
-  so_luong_dv_ke_toan_max: number;
-  so_luong_dv_khac_min: number;
-  so_luong_dv_khac_max: number;
-  doanh_thu_dv_ke_toan_min: number;
-  doanh_thu_dv_ke_toan_max: number;
-  doanh_thu_dv_khac_min: number;
-  doanh_thu_dv_khac_max: number;
-  cong_no_min: number;
-  cong_no_max: number;
   trang_thai: EmployeeStatus;
+  ngay_bat_dau?: string;
+  tham_nien: Seniority;
+  so_luong_dv_ke_toan: number;
+  so_luong_dv_khac: number;
+  doanh_thu_dv_ke_toan: number;
+  doanh_thu_dv_khac: number;
+  cong_no: number;
   ngay_sinh?: string;
   noi_sinh?: string;
   gioi_tinh?: string;
   cccd?: string;
   ma_so_thue_tncn?: string;
   dia_chi?: string;
-  ngay_bat_dau?: string;
   luong_co_ban?: number;
+}
+
+export interface EmployeeTotals {
+  total_clients: number;
+  total_so_luong_dv_ke_toan: number;
+  total_so_luong_dv_khac: number;
+  total_doanh_thu_dv_ke_toan: number;
+  total_doanh_thu_dv_khac: number;
+  total_cong_no: number;
 }
 
 export interface EmployeeStats {

@@ -1,4 +1,4 @@
-import type { Employee, EmployeeStats, EmployeeTabCount, EmployeeClient, EmployeeStatus, Group } from "@/types/employee";
+import type { Employee, EmployeeStats, EmployeeTabCount, EmployeeClient, EmployeeStatus, EmployeeTotals, Group } from "@/types/employee";
 
 const COLORS = [
   "hsl(215 70% 42%)", "hsl(152 60% 42%)", "hsl(0 72% 51%)",
@@ -7,15 +7,15 @@ const COLORS = [
 ];
 
 const EMPLOYEES_RAW: Omit<Employee, "id" | "stt" | "avatar_color" | "trang_thai">[] = [
-  { ma: "THUYLN", ho_ten: "Lê Ngọc Thùy", email: "thuyln@aservice.vn", chuc_vu: "Kế toán trưởng", nhom: "NỘI BỘ", nhom_id: 1, thoi_gian_lam_viec_min: 3, thoi_gian_lam_viec_max: 5, so_luong_dv_ke_toan_min: 12, so_luong_dv_ke_toan_max: 18, so_luong_dv_khac_min: 2, so_luong_dv_khac_max: 5, doanh_thu_dv_ke_toan_min: 23716667, doanh_thu_dv_ke_toan_max: 45000000, doanh_thu_dv_khac_min: 3000000, doanh_thu_dv_khac_max: 8000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "NTAN", ho_ten: "Nguyễn Thành An", email: "ntan@aservice.vn", chuc_vu: "Kế toán viên", nhom: "KẾ TOÁN TAF", nhom_id: 2, thoi_gian_lam_viec_min: 2, thoi_gian_lam_viec_max: 4, so_luong_dv_ke_toan_min: 8, so_luong_dv_ke_toan_max: 15, so_luong_dv_khac_min: 1, so_luong_dv_khac_max: 3, doanh_thu_dv_ke_toan_min: 18500000, doanh_thu_dv_ke_toan_max: 35000000, doanh_thu_dv_khac_min: 2000000, doanh_thu_dv_khac_max: 5000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "NTKO", ho_ten: "Nguyễn Thị Kim Oanh", email: "ntko@aservice.vn", chuc_vu: "Kế toán viên", nhom: "KẾ TOÁN TAF", nhom_id: 2, thoi_gian_lam_viec_min: 1, thoi_gian_lam_viec_max: 3, so_luong_dv_ke_toan_min: 10, so_luong_dv_ke_toan_max: 20, so_luong_dv_khac_min: 0, so_luong_dv_khac_max: 2, doanh_thu_dv_ke_toan_min: 20000000, doanh_thu_dv_ke_toan_max: 40000000, doanh_thu_dv_khac_min: 0, doanh_thu_dv_khac_max: 3000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "0012", ho_ten: "Phạm Thị Mỹ Duyên", email: "ptmd@aservice.vn", chuc_vu: "Trợ lý", nhom: "KIỂM TOÁN TAF", nhom_id: 3, thoi_gian_lam_viec_min: 1, thoi_gian_lam_viec_max: 2, so_luong_dv_ke_toan_min: 5, so_luong_dv_ke_toan_max: 10, so_luong_dv_khac_min: 1, so_luong_dv_khac_max: 4, doanh_thu_dv_ke_toan_min: 12000000, doanh_thu_dv_ke_toan_max: 25000000, doanh_thu_dv_khac_min: 1500000, doanh_thu_dv_khac_max: 4000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "PTMD", ho_ten: "Phạm Thị Thu Thảo", email: "pttt@aservice.vn", chuc_vu: "Kế toán viên", nhom: "NỘI BỘ", nhom_id: 1, thoi_gian_lam_viec_min: 4, thoi_gian_lam_viec_max: 6, so_luong_dv_ke_toan_min: 15, so_luong_dv_ke_toan_max: 22, so_luong_dv_khac_min: 3, so_luong_dv_khac_max: 6, doanh_thu_dv_ke_toan_min: 30000000, doanh_thu_dv_ke_toan_max: 55000000, doanh_thu_dv_khac_min: 5000000, doanh_thu_dv_khac_max: 10000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "0013", ho_ten: "Trần Thị Thanh Hằng", email: "ttth@aservice.vn", chuc_vu: "Kế toán viên", nhom: "KẾ TOÁN TAF", nhom_id: 2, thoi_gian_lam_viec_min: 2, thoi_gian_lam_viec_max: 4, so_luong_dv_ke_toan_min: 9, so_luong_dv_ke_toan_max: 16, so_luong_dv_khac_min: 2, so_luong_dv_khac_max: 4, doanh_thu_dv_ke_toan_min: 19000000, doanh_thu_dv_ke_toan_max: 38000000, doanh_thu_dv_khac_min: 2500000, doanh_thu_dv_khac_max: 6000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "PVP", ho_ten: "Phạm Văn Phúc", email: "pvp@aservice.vn", chuc_vu: "Trưởng nhóm", nhom: "KIỂM TOÁN TAF", nhom_id: 3, thoi_gian_lam_viec_min: 5, thoi_gian_lam_viec_max: 7, so_luong_dv_ke_toan_min: 20, so_luong_dv_ke_toan_max: 28, so_luong_dv_khac_min: 4, so_luong_dv_khac_max: 8, doanh_thu_dv_ke_toan_min: 42000000, doanh_thu_dv_ke_toan_max: 65000000, doanh_thu_dv_khac_min: 7000000, doanh_thu_dv_khac_max: 12000000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "TNYN", ho_ten: "Trần Nguyễn Yến Nhi", email: "tnyn@aservice.vn", chuc_vu: "Kế toán viên", nhom: "NỘI BỘ", nhom_id: 1, thoi_gian_lam_viec_min: 1, thoi_gian_lam_viec_max: 3, so_luong_dv_ke_toan_min: 7, so_luong_dv_ke_toan_max: 14, so_luong_dv_khac_min: 1, so_luong_dv_khac_max: 3, doanh_thu_dv_ke_toan_min: 15000000, doanh_thu_dv_ke_toan_max: 30000000, doanh_thu_dv_khac_min: 1500000, doanh_thu_dv_khac_max: 4500000, cong_no_min: 0, cong_no_max: 0 },
-  { ma: "TTTH", ho_ten: "Nguyễn Thị Diệu Hương", email: "ntdh@aservice.vn", chuc_vu: "Kế toán viên", nhom: "KẾ TOÁN TAF", nhom_id: 2, thoi_gian_lam_viec_min: 3, thoi_gian_lam_viec_max: 5, so_luong_dv_ke_toan_min: 11, so_luong_dv_ke_toan_max: 19, so_luong_dv_khac_min: 2, so_luong_dv_khac_max: 5, doanh_thu_dv_ke_toan_min: 22000000, doanh_thu_dv_ke_toan_max: 42000000, doanh_thu_dv_khac_min: 3000000, doanh_thu_dv_khac_max: 7000000, cong_no_min: 0, cong_no_max: 0 },
+  { ma: "THUYLN", ho_ten: "Lê Ngọc Thuỷ", email: "lengocthuyct343@gmail.com", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2024-01-15", tham_nien: { years: 2, months: 4 }, so_luong_dv_ke_toan: 12, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 23716667, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "NTAN", ho_ten: "Nguyễn Thành An", email: "thanhan050901nta@gmail.com", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2023-07-20", tham_nien: { years: 2, months: 10 }, so_luong_dv_ke_toan: 14, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 33483333, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "NTKO", ho_ten: "Nguyễn Thị Kim Oanh", email: "ntkimoanh220501@gmail.com", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2022-11-01", tham_nien: { years: 3, months: 4 }, so_luong_dv_ke_toan: 13, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 24366667, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "0012", ho_ten: "Phạm Thị Mỹ Duyên", email: "phamduyen5500@gmail.com", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2023-03-10", tham_nien: { years: 3, months: 0 }, so_luong_dv_ke_toan: 16, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 35900000, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "PTMD", ho_ten: "Phạm Thị Thu Thảo", email: "pttt@aservice.vn", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2022-06-15", tham_nien: { years: 3, months: 9 }, so_luong_dv_ke_toan: 22, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 55000000, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "0013", ho_ten: "Trần Thị Thanh Hằng", email: "ttth@aservice.vn", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2023-05-01", tham_nien: { years: 2, months: 10 }, so_luong_dv_ke_toan: 16, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 38000000, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "PVP", ho_ten: "Phạm Văn Phúc", email: "pvp@aservice.vn", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2025-01-01", tham_nien: { years: 1, months: 3 }, so_luong_dv_ke_toan: 13, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 267200000, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "TNYN", ho_ten: "Trần Nguyễn Yến Nhi", email: "tnyn@aservice.vn", chuc_vu: "Thực tập", nhom: "—", nhom_id: 0, ngay_bat_dau: "2024-09-01", tham_nien: { years: 0, months: 6 }, so_luong_dv_ke_toan: 0, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 0, doanh_thu_dv_khac: 0, cong_no: 0 },
+  { ma: "TTTH", ho_ten: "Nguyễn Thị Diệu Hương", email: "ntdh@aservice.vn", chuc_vu: "Kế toán", nhom: "—", nhom_id: 0, ngay_bat_dau: "2023-09-15", tham_nien: { years: 2, months: 6 }, so_luong_dv_ke_toan: 13, so_luong_dv_khac: 0, doanh_thu_dv_ke_toan: 15999443, doanh_thu_dv_khac: 0, cong_no: 0 },
 ];
 
 function buildEmployees(status: EmployeeStatus, items: typeof EMPLOYEES_RAW): Employee[] {
@@ -64,6 +64,17 @@ export function getMockEmployees(status: EmployeeStatus, search?: string): Emplo
     );
   }
   return list;
+}
+
+export function getMockEmployeeTotals(): EmployeeTotals {
+  return {
+    total_clients: 119,
+    total_so_luong_dv_ke_toan: 119,
+    total_so_luong_dv_khac: 0,
+    total_doanh_thu_dv_ke_toan: 493666110,
+    total_doanh_thu_dv_khac: 0,
+    total_cong_no: 0,
+  };
 }
 
 export function getMockEmployeeClients(employeeId: number): EmployeeClient[] {
