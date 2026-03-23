@@ -6,9 +6,11 @@ import {
   Building2,
   FileSignature,
   Wallet,
+  LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import type { AppRole } from "@/types/auth";
 import {
   Sidebar,
   SidebarContent,
@@ -19,23 +21,36 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const menuItems = [
+interface MenuItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles?: AppRole[]; // undefined = visible to all
+}
+
+const menuItems: MenuItem[] = [
   { title: "Trang điều khiển", url: "/", icon: LayoutDashboard },
   { title: "Khách hàng", url: "/khach-hang", icon: Users },
-  { title: "Nhân sự", url: "/nhan-su", icon: UserCog },
+  { title: "Nhân sự", url: "/nhan-su", icon: UserCog, roles: ["admin", "manager"] },
   { title: "Kết quả tờ khai thuế", url: "/to-khai-thue", icon: FileText },
   { title: "Trạng thái doanh nghiệp", url: "/trang-thai-dn", icon: Building2 },
-  { title: "Hợp đồng dịch vụ", url: "/hop-dong", icon: FileSignature },
-  { title: "Theo dõi công nợ", url: "/cong-no", icon: Wallet },
+  { title: "Hợp đồng dịch vụ", url: "/hop-dong", icon: FileSignature, roles: ["admin", "manager"] },
+  { title: "Theo dõi công nợ", url: "/cong-no", icon: Wallet, roles: ["admin", "manager"] },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
+  const { user, logout, hasAnyRole } = useAuth();
+
+  const visibleItems = menuItems.filter(
+    (item) => !item.roles || hasAnyRole(item.roles)
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -62,7 +77,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
@@ -81,6 +96,33 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs">
+              {user?.username?.charAt(0).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-sidebar-accent-foreground truncate">
+                {user?.username || "User"}
+              </p>
+              <p className="text-[10px] text-sidebar-foreground/60 truncate">
+                {user?.roles.join(", ")}
+              </p>
+            </div>
+          )}
+          <button
+            onClick={logout}
+            className="text-sidebar-foreground/60 hover:text-destructive transition-colors shrink-0"
+            title="Đăng xuất"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
