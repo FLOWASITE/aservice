@@ -3,6 +3,12 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CalendarIcon, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { APP_LIST } from "@/types/application";
+import { Checkbox } from "@/components/ui/checkbox";
+import logoAketoan from "@/assets/logo-aketoan.png";
+import logoAmall from "@/assets/logo-amall.png";
+import logoAread from "@/assets/logo-aread.png";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -405,23 +411,45 @@ export function CreateContractModal({ open, onOpenChange, defaultClientId }: Pro
             </RadioGroup>
           </div>
 
-          {/* Ứng dụng đăng ký (conditional) */}
+          {/* Ứng dụng đăng ký - multi-select cards (conditional) */}
           {form.phan_mem === "aketoan" && (
+            <ApplicationCardsSection
+              selectedApps={form.selected_apps || []}
+              onChangeApps={(apps) => updateField("selected_apps" as any, apps)}
+            />
+          )}
+
+          {/* Phần mềm khác - input */}
+          {form.phan_mem === "khac" && (
             <div className="space-y-1.5">
-              <Label>Ứng dụng đăng ký sử dụng</Label>
-              <Select
-                value={form.ung_dung_id ? form.ung_dung_id.toString() : ""}
-                onValueChange={(v) => updateField("ung_dung_id", Number(v))}
-              >
-                <SelectTrigger><SelectValue placeholder="Chọn ứng dụng" /></SelectTrigger>
-                <SelectContent>
-                  {applications.map((a) => (
-                    <SelectItem key={a.id} value={a.id.toString()}>{a.ten}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Tên phần mềm <span className="text-destructive">*</span></Label>
+              <Input
+                value={form.other_software_name || ""}
+                onChange={(e) => updateField("other_software_name" as any, e.target.value)}
+                placeholder="Nhập tên phần mềm đang sử dụng"
+              />
             </div>
           )}
+
+          {/* Mô tả */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Thông tin chung</Label>
+              <Textarea rows={3} placeholder="Mô tả chung về công ty" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Loại hình doanh nghiệp</Label>
+              <Textarea rows={3} placeholder="Mô tả loại hình" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Sản phẩm kinh doanh chính</Label>
+              <Textarea rows={3} placeholder="Liệt kê sản phẩm chính" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Chi phí chính</Label>
+              <Textarea rows={3} placeholder="Liệt kê chi phí chính" />
+            </div>
+          </div>
 
           {/* Cấu hình lương */}
           <div className="grid grid-cols-2 gap-4">
