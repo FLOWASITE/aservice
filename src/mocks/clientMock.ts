@@ -84,6 +84,11 @@ const allClients: Record<ClientStatus, Client[]> = {
   ngung_thuc_hien: [],
 };
 
+export function addClientToMock(client: Client) {
+  const list = allClients[client.trang_thai] || [];
+  list.push(client);
+}
+
 export function getMockClientList(
   status: ClientStatus,
   search?: string,
@@ -99,21 +104,26 @@ export function getMockClientList(
     );
   }
 
+  const allClientsList = Object.values(allClients).flat();
+  const totalEmployees = new Set(allClientsList.map(c => c.nhan_vien_phu_trach)).size;
+  const totalGroups = new Set(allClientsList.map(c => c.nhom).filter(n => n !== "—")).size;
+  const totalRevMonth = allClientsList.reduce((s, c) => s + c.phi_dich_vu_toi_thieu, 0);
+
   return {
     data,
     total: data.length,
     stats: {
-      khach_hang_da_dang_ky: 132,
-      nhan_vien: 30,
-      nhom: 5,
-      doanh_thu_thang: 838242311,
-      doanh_thu_nam: 9748898309,
+      khach_hang_da_dang_ky: allClientsList.length,
+      nhan_vien: totalEmployees,
+      nhom: totalGroups,
+      doanh_thu_thang: totalRevMonth,
+      doanh_thu_nam: totalRevMonth * 12,
     },
     tab_counts: {
-      cho_thuc_hien: 0,
-      dang_thuc_hien_ke_toan: 0,
-      dang_thuc_hien_ke_toan_khac: 0,
-      ngung_thuc_hien: 0,
+      cho_thuc_hien: (allClients["cho_thuc_hien"] || []).length,
+      dang_thuc_hien_ke_toan: (allClients["dang_thuc_hien_ke_toan"] || []).length,
+      dang_thuc_hien_ke_toan_khac: (allClients["dang_thuc_hien_ke_toan_khac"] || []).length,
+      ngung_thuc_hien: (allClients["ngung_thuc_hien"] || []).length,
     },
   };
 }
