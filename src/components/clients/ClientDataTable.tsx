@@ -239,7 +239,7 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={13} className="text-center py-10 text-muted-foreground">
                     Không tìm thấy khách hàng nào
                   </TableCell>
                 </TableRow>
@@ -295,25 +295,34 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
                       {formatNumber(client.cong_no)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <StatusBadge type="hddt" value={client.hoa_don_dien_tu} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge type="thue" value={client.thue_dien_tu} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge type="cks" value={client.chu_ky_so} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1.5">
                         {showCreateContract && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <button className="p-1 rounded hover:bg-primary/10" title="Tạo hợp đồng dịch vụ" onClick={(e) => { e.stopPropagation(); onCreateContract?.(client); }}>
-                                <PlusCircle className="h-4 w-4 text-primary" />
+                              <button className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" title="Tạo hợp đồng dịch vụ" onClick={(e) => { e.stopPropagation(); onCreateContract?.(client); }}>
+                                <PlusCircle className="h-3.5 w-3.5 text-primary" />
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>Tạo hợp đồng dịch vụ</TooltipContent>
                           </Tooltip>
                         )}
-                        <button className="p-1 rounded hover:bg-muted" title="Xem">
-                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        <button className="w-7 h-7 rounded-full bg-sky-500/10 flex items-center justify-center hover:bg-sky-500/20 transition-colors" title="Xem" onClick={(e) => e.stopPropagation()}>
+                          <Eye className="h-3.5 w-3.5 text-sky-600" />
                         </button>
-                        <button className="p-1 rounded hover:bg-muted" title="Sửa" onClick={(e) => { e.stopPropagation(); onEditClient?.(client); }}>
-                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        <button className="w-7 h-7 rounded-full bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/20 transition-colors" title="Sửa" onClick={(e) => { e.stopPropagation(); onEditClient?.(client); }}>
+                          <Edit className="h-3.5 w-3.5 text-blue-600" />
                         </button>
-                        <button className="p-1 rounded hover:bg-destructive/10" title="Xóa" onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <button className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center hover:bg-destructive/20 transition-colors" title="Xóa" onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}>
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </button>
                       </div>
                     </TableCell>
