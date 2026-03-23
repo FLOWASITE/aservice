@@ -230,7 +230,10 @@ export function ClientDataTable({ clients, isLoading, showCreateContract, onEdit
                 <TableHead className="text-right min-w-[80px]">
                   <SortButton label="Công nợ" sortKey="cong_no" current={sort} onSort={handleSort} />
                 </TableHead>
-                <TableHead className="text-center min-w-[80px]">Thao tác</TableHead>
+                <TableHead className="text-center min-w-[100px]">HĐ điện tử</TableHead>
+                <TableHead className="text-center min-w-[100px]">Thuế điện tử</TableHead>
+                <TableHead className="text-center min-w-[100px]">Chữ ký số</TableHead>
+                <TableHead className="text-center min-w-[110px]">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
