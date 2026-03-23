@@ -14,6 +14,7 @@ import ToKhaiThuePage from "@/pages/ToKhaiThuePage";
 import TrangThaiDNPage from "@/pages/TrangThaiDNPage";
 import HopDongPage from "@/pages/HopDongPage";
 import CongNoPage from "@/pages/CongNoPage";
+import ApplicationDetailPage from "@/pages/ApplicationDetailPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
                     <Routes>
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/khach-hang" element={<KhachHangPage />} />
+                      <Route path="/khach-hang/:clientId/:appCode" element={<ApplicationDetailPage />} />
                       <Route path="/nhan-su" element={<NhanSuPage />} />
                       <Route path="/to-khai-thue" element={<ToKhaiThuePage />} />
                       <Route path="/trang-thai-dn" element={<TrangThaiDNPage />} />

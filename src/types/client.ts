@@ -7,6 +7,8 @@ export interface Client {
   nhan_vien_phu_trach: string;
   nhan_vien_ho_tro: string[];
   ung_dung: boolean;
+  ung_dung_list: string[];
+  other_software?: string;
   phi_dich_vu_toi_thieu: number;
   phi_dich_vu_toi_da: number;
   cong_no: number;

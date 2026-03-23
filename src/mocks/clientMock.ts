@@ -37,10 +37,20 @@ const NHAN_VIEN = [
 
 const FEES = [0, 300000, 500000, 700000, 1000000, 1388889, 2000000, 3000000, 3200000, 5000000, 6000000, 314476666];
 
+const APP_COMBOS = [
+  ["aketoan"],
+  ["aketoan", "aread"],
+  ["aketoan", "amall", "aread"],
+  [],
+  ["aketoan", "amall"],
+  ["aread"],
+];
+
 function generateClients(status: ClientStatus, count: number, startStt: number): Client[] {
   return Array.from({ length: count }, (_, i) => {
     const nameIdx = (startStt + i) % NAMES.length;
     const initial = NAMES[nameIdx].charAt(NAMES[nameIdx].lastIndexOf(" ") + 1) || NAMES[nameIdx].charAt(0);
+    const apps = APP_COMBOS[i % APP_COMBOS.length];
     return {
       id: startStt + i,
       stt: startStt + i,
@@ -49,7 +59,8 @@ function generateClients(status: ClientStatus, count: number, startStt: number):
       nhom: NHOM[i % NHOM.length],
       nhan_vien_phu_trach: NHAN_VIEN[i % NHAN_VIEN.length],
       nhan_vien_ho_tro: i % 3 === 0 ? [NHAN_VIEN[(i + 3) % NHAN_VIEN.length]] : [],
-      ung_dung: i % 4 !== 3,
+      ung_dung: apps.length > 0,
+      ung_dung_list: apps,
       phi_dich_vu_toi_thieu: FEES[i % FEES.length],
       phi_dich_vu_toi_da: 0,
       cong_no: 0,

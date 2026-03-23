@@ -29,7 +29,7 @@ function getDefaultForm(): Record<string, any> {
     socialInsurance: { unitCode: "", username: "", password: "" },
     eInvoicePortal: { provider: "", username: "", password: "" },
     invoiceReceivingEmails: [], invoiceSendingEmails: [],
-    software: "aketoan", applicationId: undefined,
+    software: "aketoan", applications: [], otherSoftwareName: "",
     description: { general: "", businessType: "", mainProducts: "", mainExpenses: "" },
   };
 }
