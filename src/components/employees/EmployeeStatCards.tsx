@@ -13,39 +13,41 @@ export function EmployeeStatCards({ stats }: Props) {
       icon: Users,
       label: "Khách hàng phụ trách",
       value: stats.khach_hang_phu_trach.toString(),
-      accent: "bg-destructive/10 text-destructive",
-      border: "border-destructive/30",
+      iconBg: "bg-destructive/10",
+      iconColor: "text-destructive",
+      valueColor: "text-foreground",
     },
     {
       icon: PenLine,
       label: "Công nợ",
       value: fmt(stats.cong_no),
-      accent: "bg-warning/10 text-warning",
-      border: "border-warning/30",
+      iconBg: "bg-warning/10",
+      iconColor: "text-warning",
+      valueColor: "text-foreground",
     },
     {
       icon: UsersRound,
       label: "Doanh thu DV kế toán",
       value: `${fmt(stats.doanh_thu_dv_ke_toan)} VNĐ`,
-      accent: "bg-primary/10 text-primary",
-      border: "border-primary/30",
-      large: true,
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+      valueColor: "text-primary",
     },
     {
       icon: DollarSign,
       label: "Doanh thu khác",
       value: `${fmt(stats.doanh_thu_khac)} VNĐ`,
-      accent: "bg-success/10 text-success",
-      border: "border-success/30",
-      large: true,
+      iconBg: "bg-success/10",
+      iconColor: "text-success",
+      valueColor: "text-success",
     },
     {
       icon: Copyright,
       label: "Tổng doanh thu theo năm",
       value: `${fmt(stats.tong_doanh_thu_nam)} VNĐ`,
-      accent: "bg-destructive/10 text-destructive",
-      border: "border-destructive/30",
-      large: true,
+      iconBg: "bg-destructive/10",
+      iconColor: "text-destructive",
+      valueColor: "text-destructive",
     },
   ];
 
@@ -54,14 +56,14 @@ export function EmployeeStatCards({ stats }: Props) {
       {cards.map((card) => (
         <div
           key={card.label}
-          className={`rounded-lg border p-4 bg-card flex items-center gap-3 ${card.border}`}
+          className="rounded-lg border border-border bg-card p-3.5 flex items-center gap-3"
         >
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${card.accent}`}>
-            <card.icon className="h-5 w-5" />
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg}`}>
+            <card.icon className={`h-4.5 w-4.5 ${card.iconColor}`} />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] text-muted-foreground truncate">{card.label}</p>
-            <p className={`font-bold truncate ${card.large ? "text-sm text-primary" : "text-xl"}`}>
+            <p className="text-[11px] text-muted-foreground leading-tight">{card.label}</p>
+            <p className={`font-bold text-sm mt-0.5 truncate ${card.valueColor}`}>
               {card.value}
             </p>
           </div>

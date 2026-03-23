@@ -54,86 +54,113 @@ export default function NhanSuPage() {
   const defaultCounts = { dang_lam_viec: 0, nghi_thai_san: 0, khac: 0 };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h1 className="text-2xl font-bold text-foreground">Nhân sự</h1>
 
       <Tabs value={mainTab} onValueChange={setMainTab}>
-        <TabsList>
+        <TabsList className="bg-muted/50">
           <TabsTrigger value="nhan_su">Nhân sự</TabsTrigger>
           <TabsTrigger value="nhom">Nhóm</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="nhan_su" className="space-y-4 mt-4">
-          {/* Stats */}
+        <TabsContent value="nhan_su" className="space-y-5 mt-5">
+          {/* Stat cards */}
           <EmployeeStatCards stats={stats || defaultStats} />
 
-          {/* Status tabs */}
-          <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as EmployeeStatus)}>
-            <TabsList className="bg-transparent gap-1 p-0 h-auto">
-              {STATUS_TABS.map((t) => (
-                <TabsTrigger
-                  key={t.value}
-                  value={t.value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md px-3 py-1.5 text-sm"
-                >
-                  {t.label}
-                  <span className="ml-1.5 bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[10px] data-[state=active]:bg-primary-foreground/20 data-[state=active]:text-primary-foreground">
-                    ({(tabCounts || defaultCounts)[t.value]})
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          {/* Controls section */}
+          <div className="space-y-4">
+            {/* Status tabs */}
+            <div className="flex items-center gap-1">
+              {STATUS_TABS.map((t) => {
+                const isActive = statusTab === t.value;
+                const count = (tabCounts || defaultCounts)[t.value];
+                return (
+                  <button
+                    key={t.value}
+                    onClick={() => setStatusTab(t.value)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t.label}
+                    <span
+                      className={`inline-flex items-center justify-center rounded-full min-w-[20px] h-5 px-1.5 text-[11px] font-semibold ${
+                        isActive
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-foreground">Nhân sự</span>
-            <Select value={month.toString()} onValueChange={(v) => setMonth(parseInt(v))}>
-              <SelectTrigger className="w-[120px] h-9">
-                <SelectValue placeholder="Tháng" />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTHS.map((m) => (
-                  <SelectItem key={m} value={m.toString()}>Tháng {m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
-              <SelectTrigger className="w-[100px] h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {YEARS.map((y) => (
-                  <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <form onSubmit={handleSearch} className="flex gap-2 ml-auto">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9 h-9 w-[200px]" placeholder="Tìm kiếm..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-              </div>
-              <Button type="submit" size="sm" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-9">
-                Tìm kiếm
+            {/* Filters row */}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-foreground">Nhân sự</span>
+              <Select value={month.toString()} onValueChange={(v) => setMonth(parseInt(v))}>
+                <SelectTrigger className="w-[110px] h-8 text-sm">
+                  <SelectValue placeholder="Tháng" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((m) => (
+                    <SelectItem key={m} value={m.toString()}>Tháng {m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
+                <SelectTrigger className="w-[90px] h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {YEARS.map((y) => (
+                    <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <form onSubmit={handleSearch} className="flex gap-2 ml-auto">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="pl-8 h-8 w-[180px] text-sm"
+                    placeholder="Tìm kiếm..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" size="sm" className="h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm px-4">
+                  Tìm kiếm
+                </Button>
+              </form>
+            </div>
+
+            {/* Total + Add */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Tổng: <strong className="text-foreground">{employees?.length || 0}</strong>
+              </span>
+              <Button
+                size="sm"
+                onClick={() => setAddModalOpen(true)}
+                className="h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm"
+              >
+                <Plus className="h-4 w-4 mr-1" /> Thêm mới
               </Button>
-            </form>
+            </div>
           </div>
 
-          {/* Actions bar */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Tổng: <strong className="text-foreground">{employees?.length || 0}</strong></span>
-            <Button size="sm" onClick={() => setAddModalOpen(true)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-              <Plus className="h-4 w-4 mr-1" /> Thêm mới
-            </Button>
-          </div>
-
-          {/* Table */}
+          {/* Data table */}
           <EmployeeDataTable employees={employees || []} isLoading={isLoading} onDelete={handleDelete} />
 
           <AddEmployeeModal open={addModalOpen} onOpenChange={setAddModalOpen} />
         </TabsContent>
 
-        <TabsContent value="nhom" className="mt-4">
+        <TabsContent value="nhom" className="mt-5">
           <GroupsTab />
         </TabsContent>
       </Tabs>
