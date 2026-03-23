@@ -59,8 +59,11 @@ export interface EmployeeClient {
   id: number;
   ten: string;
   ma_so_thue: string;
-  phi_dich_vu: number;
-  trang_thai: string;
+  nhom_khach_hang: string;
+  gia_tri_hop_dong: number;
+  nhan_vien_ho_tro: string;
+  nhan_vien_ho_tro_color: string;
+  avatar_color: string;
 }
 
 export interface EmployeeCreatePayload {
