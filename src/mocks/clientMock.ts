@@ -72,7 +72,7 @@ function generateClients(status: ClientStatus, count: number, startStt: number):
 }
 
 const allClients: Record<ClientStatus, Client[]> = {
-  cho_thuc_hien: generateClients("cho_thuc_hien", 118, 1),
+  cho_thuc_hien: [],
   dang_thuc_hien_ke_toan: generateClients("dang_thuc_hien_ke_toan", 132, 1),
   dang_thuc_hien_ke_toan_khac: generateClients("dang_thuc_hien_ke_toan_khac", 15, 1),
   ngung_thuc_hien: generateClients("ngung_thuc_hien", 12, 1),
@@ -104,7 +104,7 @@ export function getMockClientList(
       doanh_thu_nam: 9748898309,
     },
     tab_counts: {
-      cho_thuc_hien: 118,
+      cho_thuc_hien: 0,
       dang_thuc_hien_ke_toan: 132,
       dang_thuc_hien_ke_toan_khac: 15,
       ngung_thuc_hien: 12,
