@@ -75,11 +75,8 @@ export default function ApplicationDetailPage() {
       {/* App info card */}
       <Card className="border-2" style={{ borderColor: app.color + "40" }}>
         <CardContent className="flex items-center gap-5 py-5">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: app.bgColor, color: app.color }}
-          >
-            {APP_ICONS[app.code]}
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden bg-white border border-border/30">
+            <img src={APP_LOGOS[app.code]} alt={app.name} className="w-14 h-14 object-contain" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
