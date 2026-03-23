@@ -234,6 +234,9 @@ export function EmployeeDataTable({ employees, isLoading, totals, onDelete }: Pr
 
   const hasActiveFilters = useMemo(() => globalSearch !== "" || Object.values(filters).some(v => v !== ""), [globalSearch, filters]);
 
+  // Auto-collapse when filters change
+  useEffect(() => { setExpandedId(null); }, [globalSearch, filters]);
+
   const clearAll = useCallback(() => {
     setGlobalSearch("");
     setFilters({ slKeToanMin: "", slKeToanMax: "", slKhacMin: "", slKhacMax: "", dtKeToanMin: "", dtKeToanMax: "", dtKhacMin: "", dtKhacMax: "", congNoMin: "", congNoMax: "" });
