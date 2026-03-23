@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP_LIST } from "@/types/application";
+import logoAketoan from "@/assets/logo-aketoan.png";
+import logoAmall from "@/assets/logo-amall.png";
+import logoAread from "@/assets/logo-aread.png";
 
-const ABBR: Record<string, string> = {
-  aketoan: "AKT",
-  amall: "AM",
-  aread: "AR",
+const APP_LOGOS: Record<string, string> = {
+  aketoan: logoAketoan,
+  amall: logoAmall,
+  aread: logoAread,
 };
 
 interface Props {
@@ -48,10 +51,9 @@ export function AppIcons({ clientId, apps, otherSoftware }: Props) {
                   e.stopPropagation();
                   navigate(`/khach-hang/${clientId}/${code}`);
                 }}
-                className="inline-flex items-center justify-center w-7 h-7 rounded-full text-[9px] font-bold transition-transform hover:scale-110 hover:shadow-md"
-                style={{ backgroundColor: app.bgColor, color: app.color }}
+                className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden bg-white border border-border/50 transition-transform hover:scale-110 hover:shadow-md"
               >
-                {ABBR[code] || code.slice(0, 2).toUpperCase()}
+                <img src={APP_LOGOS[code]} alt={app.name} className="w-6 h-6 object-contain" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Mở {app.name}</TooltipContent>

@@ -1,15 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ExternalLink, Settings, RefreshCw, Calculator, Store, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, Settings, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { APP_LIST } from "@/types/application";
+import logoAketoan from "@/assets/logo-aketoan.png";
+import logoAmall from "@/assets/logo-amall.png";
+import logoAread from "@/assets/logo-aread.png";
 
-const APP_ICONS: Record<string, React.ReactNode> = {
-  aketoan: <Calculator className="h-8 w-8" />,
-  amall: <Store className="h-8 w-8" />,
-  aread: <FileText className="h-8 w-8" />,
+const APP_LOGOS: Record<string, string> = {
+  aketoan: logoAketoan,
+  amall: logoAmall,
+  aread: logoAread,
 };
 
 // Mock data

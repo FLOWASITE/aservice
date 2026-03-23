@@ -20,11 +20,6 @@ interface Props {
   setField: (key: string, value: any) => void;
 }
 
-const APP_ICONS: Record<string, React.ReactNode> = {
-  aketoan: <Calculator className="h-5 w-5" />,
-  amall: <Store className="h-5 w-5" />,
-  aread: <FileText className="h-5 w-5" />,
-};
 
 export function ApplicationSection({ form, setField }: Props) {
   const selectedApps: string[] = form.applications || [];
@@ -92,11 +87,8 @@ export function ApplicationSection({ form, setField }: Props) {
                     className="mt-0.5 pointer-events-none"
                     tabIndex={-1}
                   />
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: app.bgColor, color: app.color }}
-                  >
-                    {APP_ICONS[app.code]}
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                    <img src={APP_LOGOS[app.code]} alt={app.name} className="w-8 h-8 object-contain" />
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-foreground">{app.name}</div>
