@@ -23,7 +23,7 @@ interface Props {
 const formatNumber = (v: number) =>
   v === 0 ? "0" : new Intl.NumberFormat("vi-VN").format(v);
 
-export function ClientDataTable({ clients, isLoading }: Props) {
+export function ClientDataTable({ clients, isLoading, onEditClient }: Props) {
   const [colSearch, setColSearch] = useState({
     ten: "",
     nhom: "",
