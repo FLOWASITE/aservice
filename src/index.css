@@ -57,6 +57,8 @@
     --shadow-md: 0 4px 12px -2px hsl(220 25% 12% / 0.08), 0 2px 4px -2px hsl(220 25% 12% / 0.04);
     --shadow-lg: 0 8px 24px -4px hsl(220 25% 12% / 0.1), 0 4px 8px -4px hsl(220 25% 12% / 0.06);
     --shadow-xl: 0 16px 40px -8px hsl(220 25% 12% / 0.12), 0 8px 16px -8px hsl(220 25% 12% / 0.08);
+
+    --gradient-hero: linear-gradient(135deg, hsl(220 72% 45% / 0.06) 0%, hsl(195 72% 42% / 0.04) 50%, hsl(152 60% 40% / 0.02) 100%);
   }
 
   .dark {
@@ -164,13 +166,59 @@
 
   /* Premium page header */
   .page-header {
-    @apply flex items-center justify-between pb-2;
+    @apply flex items-center justify-between pb-3;
+  }
+  .page-header-banner {
+    @apply relative rounded-2xl border bg-card p-5 overflow-hidden;
+    background: var(--gradient-hero);
+    box-shadow: var(--shadow-md);
+  }
+  .page-header-banner::before {
+    content: '';
+    @apply absolute top-0 right-0 w-64 h-64 rounded-full opacity-30;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%);
+    transform: translate(30%, -40%);
   }
   .page-title {
     @apply text-xl font-bold tracking-tight text-foreground;
   }
   .page-subtitle {
     @apply text-xs text-muted-foreground mt-0.5;
+  }
+
+  /* Animated stat card */
+  .stat-card-premium {
+    @apply relative rounded-xl border bg-card p-4 overflow-hidden transition-all duration-300;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card-premium:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .stat-card-premium::after {
+    content: '';
+    @apply absolute bottom-0 left-0 right-0 h-0.5;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .stat-card-premium:hover::after {
+    opacity: 1;
+  }
+
+  /* Chart card */
+  .chart-card {
+    @apply rounded-xl border bg-card overflow-hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .chart-card-header {
+    @apply flex items-center justify-between px-5 pt-5 pb-3;
+  }
+  .chart-card-title {
+    @apply text-sm font-semibold text-foreground;
+  }
+  .chart-card-body {
+    @apply px-5 pb-5;
   }
 
   /* Tab pill style */
