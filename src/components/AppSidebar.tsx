@@ -7,13 +7,12 @@ import {
   FileSignature,
   Wallet,
   LogOut,
-  ChevronRight,
   Sparkles,
 } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal.png";
-import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/types/auth";
+import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface MenuItem {
   title: string;
@@ -50,14 +50,18 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout, hasAnyRole } = useAuth();
+  const location = useLocation();
 
   const visibleItems = menuItems.filter(
     (item) => !item.roles || hasAnyRole(item.roles)
   );
 
+  const isActive = (url: string) =>
+    url === "/" ? location.pathname === "/" : location.pathname.startsWith(url);
+
   return (
     <Sidebar collapsible="icon">
-      {/* Header with logo */}
+      {/* Header */}
       <SidebarHeader className="p-4 border-b border-sidebar-border/50">
         <div className="flex items-center gap-3">
           {collapsed ? (
@@ -77,47 +81,46 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-0.5">
-              {visibleItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="group/nav relative rounded-lg px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/60 text-sidebar-foreground hover:text-sidebar-accent-foreground"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-sm"
-                    >
-                      {({ isActive }: { isActive: boolean }) => (
-                        <>
-                          {isActive && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-sidebar-primary" />
-                          )}
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-200 ${
-                            isActive
-                              ? "bg-sidebar-primary/15 text-sidebar-primary"
-                              : "text-sidebar-foreground/70 group-hover/nav:text-sidebar-accent-foreground"
-                          }`}>
-                            <item.icon className="h-[18px] w-[18px]" />
-                          </div>
-                          {!collapsed && (
-                            <span className="text-[13px] flex-1">{item.title}</span>
-                          )}
-                          {!collapsed && isActive && (
-                            <ChevronRight className="h-3.5 w-3.5 text-sidebar-primary/60 shrink-0" />
-                          )}
-                        </>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {visibleItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={active}>
+                      <Link
+                        to={item.url}
+                        className={cn(
+                          "group/nav relative rounded-lg px-3 py-2 transition-all duration-200 flex items-center gap-3",
+                          active
+                            ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                        )}
+                      >
+                        {active && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-sidebar-primary" />
+                        )}
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-200",
+                          active
+                            ? "bg-sidebar-primary/15 text-sidebar-primary"
+                            : "text-sidebar-foreground/70 group-hover/nav:text-sidebar-accent-foreground"
+                        )}>
+                          <item.icon className="h-[18px] w-[18px]" />
+                        </div>
+                        {!collapsed && (
+                          <span className="text-[13px] flex-1">{item.title}</span>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer with user info */}
+      {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border/50 p-3">
-        {/* Pro badge - only when expanded */}
         {!collapsed && (
           <div className="mb-3 rounded-xl bg-gradient-to-r from-sidebar-primary/10 to-sidebar-accent/10 p-3 border border-sidebar-border/30">
             <div className="flex items-center gap-2 mb-1">
