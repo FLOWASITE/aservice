@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, UserCog } from "lucide-react";
+import { Plus, UserCog, Calendar } from "lucide-react";
 import { EmployeeStatCards } from "@/components/employees/EmployeeStatCards";
 import { EmployeeDataTable } from "@/components/employees/EmployeeDataTable";
 import { AddEmployeeModal } from "@/components/employees/AddEmployeeModal";
@@ -49,21 +49,23 @@ export default function NhanSuPage() {
 
   return (
     <div className="space-y-5">
-      {/* Page header */}
-      <div className="page-header">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <UserCog className="h-5 w-5 text-primary" />
+      {/* Hero Header */}
+      <div className="page-header-banner">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+              <UserCog className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="page-title text-[22px]">Nhân sự</h1>
+              <p className="page-subtitle">Quản lý nhân viên và nhóm làm việc</p>
+            </div>
           </div>
-          <div>
-            <h1 className="page-title">Nhân sự</h1>
-            <p className="page-subtitle">Quản lý nhân viên và nhóm làm việc</p>
-          </div>
+          <Button size="sm" className="h-9 gap-1.5 shadow-sm" onClick={() => setAddModalOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Thêm mới
+          </Button>
         </div>
-        <Button size="sm" className="h-9 gap-1.5" onClick={() => setAddModalOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Thêm mới
-        </Button>
       </div>
 
       <Tabs value={mainTab} onValueChange={setMainTab}>
@@ -73,13 +75,11 @@ export default function NhanSuPage() {
         </TabsList>
 
         <TabsContent value="nhan_su" className="space-y-5 mt-5">
-          {/* Stat cards */}
           <EmployeeStatCards stats={stats || defaultStats} />
 
-          {/* Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Status tabs as pills */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60">
+          {/* Controls bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-1.5 rounded-xl bg-muted/40 border border-border/50">
+            <div className="flex items-center gap-1 p-0.5 rounded-lg">
               {STATUS_TABS.map((t) => {
                 const isActive = statusTab === t.value;
                 const count = (tabCounts || defaultCounts)[t.value];
@@ -90,13 +90,9 @@ export default function NhanSuPage() {
                     className={`tab-pill ${isActive ? "tab-pill-active" : "tab-pill-inactive"}`}
                   >
                     {t.label}
-                    <span
-                      className={`inline-flex items-center justify-center rounded-md min-w-[20px] h-[18px] px-1 text-[10px] font-bold ${
-                        isActive
-                          ? "bg-primary-foreground/20 text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
+                    <span className={`inline-flex items-center justify-center rounded-md min-w-[20px] h-[18px] px-1 text-[10px] font-bold ${
+                      isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-background text-muted-foreground"
+                    }`}>
                       {count}
                     </span>
                   </button>
@@ -104,10 +100,12 @@ export default function NhanSuPage() {
               })}
             </div>
 
-            {/* Filters */}
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
+              </div>
               <Select value={month.toString()} onValueChange={(v) => setMonth(parseInt(v))}>
-                <SelectTrigger className="w-[110px] h-8 text-xs rounded-lg">
+                <SelectTrigger className="w-[110px] h-8 text-xs rounded-lg bg-card">
                   <SelectValue placeholder="Tháng" />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,7 +115,7 @@ export default function NhanSuPage() {
                 </SelectContent>
               </Select>
               <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
-                <SelectTrigger className="w-[90px] h-8 text-xs rounded-lg">
+                <SelectTrigger className="w-[90px] h-8 text-xs rounded-lg bg-card">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -126,13 +124,13 @@ export default function NhanSuPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <span className="text-xs text-muted-foreground ml-1">
+              <div className="h-5 w-px bg-border mx-1" />
+              <span className="text-xs text-muted-foreground">
                 Tổng: <strong className="text-foreground">{employees?.length || 0}</strong>
               </span>
             </div>
           </div>
 
-          {/* Data table */}
           <EmployeeDataTable employees={employees || []} isLoading={isLoading} totals={totals} onDelete={handleDelete} />
         </TabsContent>
 
