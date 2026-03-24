@@ -34,37 +34,37 @@ export default function HopDongPage() {
 
   return (
     <div className="space-y-5">
-      {/* Page header */}
-      <div className="page-header">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <FileSignature className="h-5 w-5 text-primary" />
+      {/* Hero Header */}
+      <div className="page-header-banner">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+              <FileSignature className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="page-title text-[22px]">Hợp đồng dịch vụ</h1>
+              <p className="page-subtitle">Quản lý hợp đồng và dịch vụ kế toán</p>
+            </div>
           </div>
-          <div>
-            <h1 className="page-title">Hợp đồng dịch vụ</h1>
-            <p className="page-subtitle">Quản lý hợp đồng và dịch vụ kế toán</p>
-          </div>
+          <Button size="sm" className="h-9 gap-1.5 shadow-sm" onClick={() => setModalOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Thêm mới
+          </Button>
         </div>
-        <Button size="sm" className="h-9 gap-1.5" onClick={() => setModalOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Thêm mới
-        </Button>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
-          <div key={card.label} className={`premium-card ${card.gradient} group`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${card.iconBg} transition-transform duration-200 group-hover:scale-110`}>
-                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider truncate">{card.label}</p>
-                <p className="font-bold text-lg leading-tight truncate text-foreground">{card.value}</p>
-                {card.suffix && <p className="text-[10px] text-muted-foreground">{card.suffix}</p>}
+          <div key={card.label} className={`stat-card-premium ${card.gradient} group`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg} transition-transform duration-200 group-hover:scale-110`}>
+                <card.icon className={`h-4 w-4 ${card.iconColor}`} />
               </div>
             </div>
+            <p className="font-bold text-xl leading-tight text-foreground">{card.value}</p>
+            {card.suffix && <p className="text-[10px] text-muted-foreground mt-0.5">{card.suffix}</p>}
           </div>
         ))}
       </div>
@@ -77,11 +77,7 @@ export default function HopDongPage() {
         </TabsList>
 
         <TabsContent value="contracts" className="space-y-4">
-          <ContractDataTable
-            contracts={contracts}
-            isLoading={isLoading}
-            onDelete={handleDelete}
-          />
+          <ContractDataTable contracts={contracts} isLoading={isLoading} onDelete={handleDelete} />
         </TabsContent>
 
         <TabsContent value="services">

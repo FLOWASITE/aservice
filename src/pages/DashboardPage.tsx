@@ -1,15 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Building2, Wallet, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, FileText, Building2, Wallet, TrendingUp, TrendingDown, LayoutDashboard, ArrowUpRight, Activity } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart,
 } from "recharts";
 
 const stats = [
-  { label: "Khách hàng", value: "132", icon: Users, change: "+12%", up: true },
-  { label: "Tờ khai thuế", value: "45", icon: FileText, change: "+5%", up: true },
-  { label: "Doanh nghiệp", value: "86", icon: Building2, change: "+3%", up: true },
-  { label: "Công nợ", value: "₫1.2B", icon: Wallet, change: "-8%", up: false },
+  { label: "Khách hàng", value: "132", icon: Users, change: "+12%", up: true, gradient: "stat-gradient-blue", iconBg: "bg-primary/10", iconColor: "text-primary" },
+  { label: "Tờ khai thuế", value: "45", icon: FileText, change: "+5%", up: true, gradient: "stat-gradient-teal", iconBg: "bg-accent/10", iconColor: "text-accent" },
+  { label: "Doanh nghiệp", value: "86", icon: Building2, change: "+3%", up: true, gradient: "stat-gradient-green", iconBg: "bg-success/10", iconColor: "text-success" },
+  { label: "Công nợ", value: "₫1.2B", icon: Wallet, change: "-8%", up: false, gradient: "stat-gradient-amber", iconBg: "bg-warning/10", iconColor: "text-warning" },
 ];
 
 const revenueData = [
@@ -66,187 +65,185 @@ const taxMonthlyData = [
 
 const formatVND = (v: number) => `${v}tr`;
 
+const tooltipStyle = {
+  backgroundColor: "hsl(0, 0%, 100%)",
+  border: "1px solid hsl(220, 16%, 90%)",
+  borderRadius: 10,
+  fontSize: 12,
+  boxShadow: "0 4px 12px -2px hsl(220 25% 12% / 0.08)",
+};
+
+const axisTickStyle = { fontSize: 11, fill: "hsl(220, 10%, 48%)" };
+const gridStroke = "hsl(220, 16%, 92%)";
+
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Trang điều khiển</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Tổng quan hoạt động hệ thống quản lý dịch vụ kế toán
-        </p>
+      {/* Hero Header */}
+      <div className="page-header-banner">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+              <LayoutDashboard className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="page-title text-[22px]">Trang điều khiển</h1>
+              <p className="page-subtitle">Tổng quan hoạt động hệ thống quản lý dịch vụ kế toán</p>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
+              <Activity className="h-3 w-3" />
+              Hệ thống hoạt động bình thường
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.label}
-              </CardTitle>
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <stat.icon className="h-4 w-4 text-primary" />
+          <div key={stat.label} className={`stat-card-premium ${stat.gradient} group`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</span>
+              <div className={`w-9 h-9 rounded-lg ${stat.iconBg} flex items-center justify-center transition-transform duration-200 group-hover:scale-110`}>
+                <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-              <div className="flex items-center gap-1 mt-1">
-                {stat.up ? (
-                  <TrendingUp className="h-3 w-3 text-success" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 text-destructive" />
-                )}
-                <span className={`text-xs font-medium ${stat.up ? "text-success" : "text-destructive"}`}>
-                  {stat.change}
-                </span>
-                <span className="text-xs text-muted-foreground">so với tháng trước</span>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-2xl font-bold text-foreground tracking-tight">{stat.value}</div>
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                stat.up ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+              }`}>
+                {stat.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                {stat.change}
+              </span>
+              <span className="text-[10px] text-muted-foreground">so với tháng trước</span>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Revenue Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Doanh thu & Chi phí theo tháng (triệu ₫)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[320px]">
+      <div className="chart-card">
+        <div className="chart-card-header">
+          <div>
+            <h3 className="chart-card-title">Doanh thu & Chi phí</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Theo tháng (triệu ₫)</p>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[11px] text-primary font-medium cursor-pointer hover:underline">
+            Chi tiết <ArrowUpRight className="h-3 w-3" />
+          </span>
+        </div>
+        <div className="chart-card-body">
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: "hsl(215, 12%, 50%)" }} />
-                <YAxis tick={{ fontSize: 12, fill: "hsl(215, 12%, 50%)" }} tickFormatter={formatVND} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(0, 0%, 100%)",
-                    border: "1px solid hsl(214, 20%, 88%)",
-                    borderRadius: 8,
-                    fontSize: 13,
-                  }}
-                  formatter={(value: number, name: string) => [
-                    `${value} triệu`,
-                    name === "doanh_thu" ? "Doanh thu" : "Chi phí",
-                  ]}
+              <BarChart data={revenueData} barGap={6} barSize={18}>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+                <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
+                <YAxis tick={axisTickStyle} tickFormatter={formatVND} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle}
+                  formatter={(value: number, name: string) => [`${value} triệu`, name === "doanh_thu" ? "Doanh thu" : "Chi phí"]}
                 />
-                <Legend
-                  formatter={(value) => (value === "doanh_thu" ? "Doanh thu" : "Chi phí")}
-                />
-                <Bar dataKey="doanh_thu" fill="hsl(215, 70%, 42%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="chi_phi" fill="hsl(195, 70%, 45%)" radius={[4, 4, 0, 0]} />
+                <Legend formatter={(value) => (value === "doanh_thu" ? "Doanh thu" : "Chi phí")} iconType="circle" iconSize={8} />
+                <Bar dataKey="doanh_thu" fill="hsl(215, 70%, 42%)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="chi_phi" fill="hsl(195, 70%, 45%)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Client Growth */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Tăng trưởng khách hàng</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[280px]">
+        <div className="chart-card">
+          <div className="chart-card-header">
+            <div>
+              <h3 className="chart-card-title">Tăng trưởng khách hàng</h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Số lượng khách hàng theo tháng</p>
+            </div>
+          </div>
+          <div className="chart-card-body">
+            <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={clientGrowthData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: "hsl(215, 12%, 50%)" }} />
-                  <YAxis tick={{ fontSize: 12, fill: "hsl(215, 12%, 50%)" }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(0, 0%, 100%)",
-                      border: "1px solid hsl(214, 20%, 88%)",
-                      borderRadius: 8,
-                      fontSize: 13,
-                    }}
+                <AreaChart data={clientGrowthData}>
+                  <defs>
+                    <linearGradient id="colorKH" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(152, 60%, 42%)" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="hsl(152, 60%, 42%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+                  <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
+                  <YAxis tick={axisTickStyle} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle}
                     formatter={(value: number) => [`${value} khách hàng`, "Số lượng"]}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="khach_hang"
-                    stroke="hsl(152, 60%, 42%)"
-                    strokeWidth={2.5}
-                    dot={{ r: 4, fill: "hsl(152, 60%, 42%)" }}
-                    activeDot={{ r: 6 }}
+                  <Area type="monotone" dataKey="khach_hang" stroke="hsl(152, 60%, 42%)" strokeWidth={2.5}
+                    fillOpacity={1} fill="url(#colorKH)" dot={{ r: 3, fill: "hsl(152, 60%, 42%)", strokeWidth: 0 }}
+                    activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(0, 0%, 100%)" }}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Tax Declarations Pie */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Tờ khai thuế theo loại</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[280px] flex items-center">
+        <div className="chart-card">
+          <div className="chart-card-header">
+            <div>
+              <h3 className="chart-card-title">Tờ khai thuế theo loại</h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Phân bổ theo loại tờ khai</p>
+            </div>
+          </div>
+          <div className="chart-card-body">
+            <div className="h-[260px] flex items-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={taxDeclarationData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    dataKey="value"
-                    nameKey="name"
-                    paddingAngle={3}
-                    strokeWidth={0}
+                  <Pie data={taxDeclarationData} cx="50%" cy="50%" innerRadius={55} outerRadius={95}
+                    dataKey="value" nameKey="name" paddingAngle={4} strokeWidth={0}
                   >
                     {taxDeclarationData.map((entry, index) => (
                       <Cell key={index} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(0, 0%, 100%)",
-                      border: "1px solid hsl(214, 20%, 88%)",
-                      borderRadius: 8,
-                      fontSize: 13,
-                    }}
+                  <Tooltip contentStyle={tooltipStyle}
                     formatter={(value: number, name: string) => [`${value} tờ khai`, name]}
                   />
-                  <Legend />
+                  <Legend iconType="circle" iconSize={8} formatter={(value) => <span className="text-xs text-foreground">{value}</span>} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Tax Declarations by Month */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tờ khai thuế theo tháng</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
+      <div className="chart-card">
+        <div className="chart-card-header">
+          <div>
+            <h3 className="chart-card-title">Tờ khai thuế theo tháng</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Phân loại GTGT, TNCN, TNDN</p>
+          </div>
+        </div>
+        <div className="chart-card-body">
+          <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={taxMonthlyData} barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: "hsl(215, 12%, 50%)" }} />
-                <YAxis tick={{ fontSize: 12, fill: "hsl(215, 12%, 50%)" }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(0, 0%, 100%)",
-                    border: "1px solid hsl(214, 20%, 88%)",
-                    borderRadius: 8,
-                    fontSize: 13,
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="gtgt" name="GTGT" fill="hsl(215, 70%, 42%)" radius={[3, 3, 0, 0]} stackId="a" />
+              <BarChart data={taxMonthlyData} barGap={2} barSize={20}>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+                <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
+                <YAxis tick={axisTickStyle} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Legend iconType="circle" iconSize={8} />
+                <Bar dataKey="gtgt" name="GTGT" fill="hsl(215, 70%, 42%)" radius={[0, 0, 0, 0]} stackId="a" />
                 <Bar dataKey="tncn" name="TNCN" fill="hsl(152, 60%, 42%)" radius={[0, 0, 0, 0]} stackId="a" />
-                <Bar dataKey="tndn" name="TNDN" fill="hsl(38, 92%, 50%)" radius={[3, 3, 0, 0]} stackId="a" />
+                <Bar dataKey="tndn" name="TNDN" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} stackId="a" />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
