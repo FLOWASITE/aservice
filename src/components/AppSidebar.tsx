@@ -7,11 +7,12 @@ import {
   FileSignature,
   Wallet,
   LogOut,
+  Sparkles,
 } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal.png";
-import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/types/auth";
+import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -26,12 +27,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface MenuItem {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
-  roles?: AppRole[]; // undefined = visible to all
+  roles?: AppRole[];
 }
 
 const menuItems: MenuItem[] = [
@@ -48,17 +50,22 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout, hasAnyRole } = useAuth();
+  const location = useLocation();
 
   const visibleItems = menuItems.filter(
     (item) => !item.roles || hasAnyRole(item.roles)
   );
 
+  const isActive = (url: string) =>
+    url === "/" ? location.pathname === "/" : location.pathname.startsWith(url);
+
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
+      {/* Header */}
+      <SidebarHeader className="p-4 border-b border-sidebar-border/50">
         <div className="flex items-center gap-3">
           {collapsed ? (
-            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-sm shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 flex items-center justify-center text-sidebar-primary-foreground font-bold text-sm shrink-0 shadow-lg shadow-sidebar-primary/20">
               A
             </div>
           ) : (
@@ -67,53 +74,84 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2 py-3">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] tracking-wider">
+          <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[9px] tracking-[0.15em] font-semibold mb-1 px-3">
             Menu chính
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="hover:bg-sidebar-accent/80"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="space-y-0.5">
+              {visibleItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={active}>
+                      <Link
+                        to={item.url}
+                        className={cn(
+                          "group/nav relative rounded-lg px-3 py-2 transition-all duration-200 flex items-center gap-3",
+                          active
+                            ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                        )}
+                      >
+                        {active && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-sidebar-primary" />
+                        )}
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-200",
+                          active
+                            ? "bg-sidebar-primary/15 text-sidebar-primary"
+                            : "text-sidebar-foreground/70 group-hover/nav:text-sidebar-accent-foreground"
+                        )}>
+                          <item.icon className="h-[18px] w-[18px]" />
+                        </div>
+                        {!collapsed && (
+                          <span className="text-[13px] flex-1">{item.title}</span>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-3">
+      {/* Footer */}
+      <SidebarFooter className="border-t border-sidebar-border/50 p-3">
+        {!collapsed && (
+          <div className="mb-3 rounded-xl bg-gradient-to-r from-sidebar-primary/10 to-sidebar-accent/10 p-3 border border-sidebar-border/30">
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="h-3.5 w-3.5 text-sidebar-primary" />
+              <span className="text-[11px] font-semibold text-sidebar-accent-foreground">AService Pro</span>
+            </div>
+            <p className="text-[10px] text-sidebar-foreground/60 leading-relaxed">
+              Hệ thống quản lý dịch vụ kế toán chuyên nghiệp
+            </p>
+          </div>
+        )}
+
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs">
+          <Avatar className="h-9 w-9 shrink-0 ring-2 ring-sidebar-border/50 ring-offset-1 ring-offset-sidebar-DEFAULT">
+            <AvatarFallback className="bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-sidebar-primary-foreground text-xs font-semibold">
               {user?.username?.charAt(0).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-accent-foreground truncate">
+              <p className="text-[13px] font-semibold text-sidebar-accent-foreground truncate">
                 {user?.username || "User"}
               </p>
-              <p className="text-[10px] text-sidebar-foreground/60 truncate">
+              <p className="text-[10px] text-sidebar-foreground/50 truncate capitalize">
                 {user?.roles.join(", ")}
               </p>
             </div>
           )}
           <button
             onClick={logout}
-            className="text-sidebar-foreground/60 hover:text-destructive transition-colors shrink-0"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sidebar-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 shrink-0"
             title="Đăng xuất"
           >
             <LogOut className="h-4 w-4" />
