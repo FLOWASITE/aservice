@@ -1,45 +1,33 @@
-import { Users, FileText, Building2, Wallet, TrendingUp, TrendingDown, LayoutDashboard, ArrowUpRight, Activity } from "lucide-react";
+import { Users, FileText, Briefcase, Wallet, TrendingUp, TrendingDown, LayoutDashboard, ArrowUpRight, Activity } from "lucide-react";
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart,
 } from "recharts";
+import { getMockClientList } from "@/mocks/clientMock";
+import { mockContracts } from "@/mocks/contractMock";
+import { getMockEmployees } from "@/mocks/employeeMock";
+import type { ClientStatus } from "@/types/client";
 
-const stats = [
-  { label: "Khách hàng", value: "132", icon: Users, change: "+12%", up: true, gradient: "stat-gradient-blue", iconBg: "bg-primary/10", iconColor: "text-primary" },
-  { label: "Tờ khai thuế", value: "45", icon: FileText, change: "+5%", up: true, gradient: "stat-gradient-teal", iconBg: "bg-accent/10", iconColor: "text-accent" },
-  { label: "Doanh nghiệp", value: "86", icon: Building2, change: "+3%", up: true, gradient: "stat-gradient-green", iconBg: "bg-success/10", iconColor: "text-success" },
-  { label: "Công nợ", value: "₫1.2B", icon: Wallet, change: "-8%", up: false, gradient: "stat-gradient-amber", iconBg: "bg-warning/10", iconColor: "text-warning" },
-];
+const tooltipStyle = {
+  backgroundColor: "hsl(0, 0%, 100%)",
+  border: "1px solid hsl(220, 16%, 90%)",
+  borderRadius: 10,
+  fontSize: 12,
+  boxShadow: "0 4px 12px -2px hsl(220 25% 12% / 0.08)",
+};
+const axisTickStyle = { fontSize: 11, fill: "hsl(220, 10%, 48%)" };
+const gridStroke = "hsl(220, 16%, 92%)";
 
-const revenueData = [
-  { month: "T1", doanh_thu: 680, chi_phi: 420 },
-  { month: "T2", doanh_thu: 750, chi_phi: 380 },
-  { month: "T3", doanh_thu: 820, chi_phi: 450 },
-  { month: "T4", doanh_thu: 910, chi_phi: 470 },
-  { month: "T5", doanh_thu: 780, chi_phi: 430 },
-  { month: "T6", doanh_thu: 950, chi_phi: 510 },
-  { month: "T7", doanh_thu: 1020, chi_phi: 480 },
-  { month: "T8", doanh_thu: 890, chi_phi: 460 },
-  { month: "T9", doanh_thu: 1100, chi_phi: 520 },
-  { month: "T10", doanh_thu: 1050, chi_phi: 490 },
-  { month: "T11", doanh_thu: 1180, chi_phi: 540 },
-  { month: "T12", doanh_thu: 1250, chi_phi: 560 },
-];
+const formatVND = (v: number) => {
+  if (v >= 1000) return `${(v / 1000).toFixed(1)}tỷ`;
+  return `${v}tr`;
+};
 
-const clientGrowthData = [
-  { month: "T1", khach_hang: 95 },
-  { month: "T2", khach_hang: 98 },
-  { month: "T3", khach_hang: 102 },
-  { month: "T4", khach_hang: 108 },
-  { month: "T5", khach_hang: 110 },
-  { month: "T6", khach_hang: 115 },
-  { month: "T7", khach_hang: 118 },
-  { month: "T8", khach_hang: 120 },
-  { month: "T9", khach_hang: 125 },
-  { month: "T10", khach_hang: 128 },
-  { month: "T11", khach_hang: 130 },
-  { month: "T12", khach_hang: 132 },
-];
+const formatCurrency = (v: number) => {
+  if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)} tỷ`;
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)} triệu`;
+  return v.toLocaleString("vi-VN") + " ₫";
+};
 
 const taxDeclarationData = [
   { name: "GTGT", value: 18, color: "hsl(215, 70%, 42%)" },
@@ -63,20 +51,52 @@ const taxMonthlyData = [
   { month: "T12", gtgt: 5, tncn: 3, tndn: 2 },
 ];
 
-const formatVND = (v: number) => `${v}tr`;
-
-const tooltipStyle = {
-  backgroundColor: "hsl(0, 0%, 100%)",
-  border: "1px solid hsl(220, 16%, 90%)",
-  borderRadius: 10,
-  fontSize: 12,
-  boxShadow: "0 4px 12px -2px hsl(220 25% 12% / 0.08)",
-};
-
-const axisTickStyle = { fontSize: 11, fill: "hsl(220, 10%, 48%)" };
-const gridStroke = "hsl(220, 16%, 92%)";
-
 export default function DashboardPage() {
+  // Dynamic KPI data
+  const statuses: ClientStatus[] = ["cho_thuc_hien", "dang_thuc_hien_ke_toan", "dang_thuc_hien_ke_toan_khac", "ngung_thuc_hien"];
+  const totalClients = statuses.reduce((sum, s) => sum + getMockClientList(s).total, 0);
+  const totalContracts = mockContracts.length;
+  const totalEmployees = getMockEmployees("dang_lam_viec").length;
+  const totalRevenue = mockContracts.reduce((s, c) => s + (c.contractValue || 0), 0);
+
+  const stats = [
+    { label: "Khách hàng", value: totalClients.toString(), icon: Users, gradient: "stat-gradient-blue", iconBg: "bg-primary/10", iconColor: "text-primary" },
+    { label: "Hợp đồng", value: totalContracts.toString(), icon: Briefcase, gradient: "stat-gradient-teal", iconBg: "bg-accent/10", iconColor: "text-accent" },
+    { label: "Nhân viên", value: totalEmployees.toString(), icon: Users, gradient: "stat-gradient-green", iconBg: "bg-success/10", iconColor: "text-success" },
+    { label: "Doanh thu", value: formatCurrency(totalRevenue), icon: Wallet, gradient: "stat-gradient-amber", iconBg: "bg-warning/10", iconColor: "text-warning" },
+  ];
+
+  // Revenue by month from contracts
+  const revenueByMonth: { month: string; doanh_thu: number }[] = [];
+  for (let m = 1; m <= 12; m++) {
+    const monthRevenue = mockContracts
+      .filter(c => {
+        const d = new Date(c.startDate);
+        return d.getMonth() + 1 === m;
+      })
+      .reduce((s, c) => s + (c.contractValue || 0), 0);
+    revenueByMonth.push({ month: `T${m}`, doanh_thu: Math.round(monthRevenue / 1_000_000) });
+  }
+  const hasRevenue = revenueByMonth.some(r => r.doanh_thu > 0);
+
+  // Client growth (cumulative clients by month based on contract start dates)
+  const clientGrowthData = (() => {
+    const months: { month: string; khach_hang: number }[] = [];
+    for (let m = 1; m <= 12; m++) {
+      const clientsUpToMonth = new Set(
+        mockContracts
+          .filter(c => {
+            const d = new Date(c.startDate);
+            return d.getMonth() + 1 <= m;
+          })
+          .map(c => c.clientId)
+      ).size;
+      months.push({ month: `T${m}`, khach_hang: clientsUpToMonth || 0 });
+    }
+    return months;
+  })();
+  const hasClientGrowth = clientGrowthData.some(d => d.khach_hang > 0);
+
   return (
     <div className="space-y-6">
       {/* Hero Header */}
@@ -111,15 +131,6 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="text-2xl font-bold text-foreground tracking-tight">{stat.value}</div>
-            <div className="flex items-center gap-1.5 mt-2">
-              <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                stat.up ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-              }`}>
-                {stat.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                {stat.change}
-              </span>
-              <span className="text-[10px] text-muted-foreground">so với tháng trước</span>
-            </div>
           </div>
         ))}
       </div>
@@ -128,8 +139,8 @@ export default function DashboardPage() {
       <div className="chart-card">
         <div className="chart-card-header">
           <div>
-            <h3 className="chart-card-title">Doanh thu & Chi phí</h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Theo tháng (triệu ₫)</p>
+            <h3 className="chart-card-title">Doanh thu theo tháng</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Từ hợp đồng dịch vụ (triệu ₫)</p>
           </div>
           <span className="inline-flex items-center gap-1 text-[11px] text-primary font-medium cursor-pointer hover:underline">
             Chi tiết <ArrowUpRight className="h-3 w-3" />
@@ -137,19 +148,24 @@ export default function DashboardPage() {
         </div>
         <div className="chart-card-body">
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueData} barGap={6} barSize={18}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-                <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
-                <YAxis tick={axisTickStyle} tickFormatter={formatVND} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle}
-                  formatter={(value: number, name: string) => [`${value} triệu`, name === "doanh_thu" ? "Doanh thu" : "Chi phí"]}
-                />
-                <Legend formatter={(value) => (value === "doanh_thu" ? "Doanh thu" : "Chi phí")} iconType="circle" iconSize={8} />
-                <Bar dataKey="doanh_thu" fill="hsl(215, 70%, 42%)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="chi_phi" fill="hsl(195, 70%, 45%)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {hasRevenue ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueByMonth} barSize={24}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+                  <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
+                  <YAxis tick={axisTickStyle} tickFormatter={formatVND} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle}
+                    formatter={(value: number) => [`${value} triệu`, "Doanh thu"]}
+                  />
+                  <Legend formatter={() => "Doanh thu"} iconType="circle" iconSize={8} />
+                  <Bar dataKey="doanh_thu" fill="hsl(215, 70%, 42%)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                Chưa có dữ liệu hợp đồng
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -165,26 +181,32 @@ export default function DashboardPage() {
           </div>
           <div className="chart-card-body">
             <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={clientGrowthData}>
-                  <defs>
-                    <linearGradient id="colorKH" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(152, 60%, 42%)" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="hsl(152, 60%, 42%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-                  <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
-                  <YAxis tick={axisTickStyle} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={tooltipStyle}
-                    formatter={(value: number) => [`${value} khách hàng`, "Số lượng"]}
-                  />
-                  <Area type="monotone" dataKey="khach_hang" stroke="hsl(152, 60%, 42%)" strokeWidth={2.5}
-                    fillOpacity={1} fill="url(#colorKH)" dot={{ r: 3, fill: "hsl(152, 60%, 42%)", strokeWidth: 0 }}
-                    activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(0, 0%, 100%)" }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {hasClientGrowth ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={clientGrowthData}>
+                    <defs>
+                      <linearGradient id="colorKH" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(152, 60%, 42%)" stopOpacity={0.15} />
+                        <stop offset="95%" stopColor="hsl(152, 60%, 42%)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+                    <XAxis dataKey="month" tick={axisTickStyle} axisLine={false} tickLine={false} />
+                    <YAxis tick={axisTickStyle} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={tooltipStyle}
+                      formatter={(value: number) => [`${value} khách hàng`, "Số lượng"]}
+                    />
+                    <Area type="monotone" dataKey="khach_hang" stroke="hsl(152, 60%, 42%)" strokeWidth={2.5}
+                      fillOpacity={1} fill="url(#colorKH)" dot={{ r: 3, fill: "hsl(152, 60%, 42%)", strokeWidth: 0 }}
+                      activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(0, 0%, 100%)" }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Chưa có dữ liệu khách hàng
+                </div>
+              )}
             </div>
           </div>
         </div>
